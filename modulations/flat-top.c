@@ -36,29 +36,21 @@ void flat_top_init(
     parameters->top_w.angle_center = M_PI/2 - 2*RAD_120_DEGREE;
 
     /*
-     * Expand flat-top interval using span value
+     * Flat-bottom angles are 180 degrees phase-shifted from the flat-top angles
      */
     for (uint8_t i=0; i<3; i++)
-    {
-        parameters->top[i].angle_start = parameters->top[i].angle_center - flat_top_span;
-        parameters->top[i].angle_stop  = parameters->top[i].angle_center + flat_top_span;
-    }
-
-    /*
-     * Calculate flat-bottom angles phase-shifted from the flat-top angles
-     */
-    for (uint8_t i=0; i<3; i++)
-    {
         parameters->bottom[i].angle_center = parameters->top[i].angle_center + M_PI;
-    }
 
     /*
-     * Expand flat-bottom interval using span value
+     * Expand flat-bottom intervals using span value
      */
-    for (uint8_t i=0; i<3; i++)
+    for (uint8_t i=0; i<6; i++)
     {
-        parameters->bottom[i].angle_start = parameters->bottom[i].angle_center - flat_top_span;
-        parameters->bottom[i].angle_stop  = parameters->bottom[i].angle_center + flat_top_span;
+        normalize_angle(&parameters->interval[i].angle_center);
+        parameters->interval[i].angle.start = parameters->interval[i].angle_center - flat_top_span;
+        parameters->interval[i].angle.stop  = parameters->interval[i].angle_center + flat_top_span;
+        normalize_angle(&parameters->interval[i].angle.start);
+        normalize_angle(&parameters->interval[i].angle.stop);
     }
 
     parameters->modulation_value_max = +1.0f;
@@ -76,11 +68,8 @@ static inline bool angle_lies_within(
         flat_top_interval_t* interval
         )
 {
-    normalize_angle(&angle);
-    float upper_threshold = interval->angle_stop;
-    normalize_angle(&upper_threshold);
-    float lower_threshold = interval->angle_start;
-    normalize_angle(&lower_threshold);
+    float upper_threshold = interval->angle.stop;
+    float lower_threshold = interval->angle.start;
 
     if (lower_threshold < upper_threshold)
         return (angle > lower_threshold) && (angle < upper_threshold);
@@ -104,6 +93,9 @@ void flat_top_apply_ccm(
         PFC_FLATTOP_INDICATOR_V,
         PFC_FLATTOP_INDICATOR_W
         };
+
+    // All pre-configured angles are normalized.
+    normalize_angle(&theta);
 
     /*
      * For all three phases determine whether to switch to flat top mode or not

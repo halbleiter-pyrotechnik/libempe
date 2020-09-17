@@ -16,6 +16,13 @@
 #define FLATTOP_INDICATOR_ACTIVE_BOTTOM 0.0
 
 
+typedef struct
+{
+    float start;
+    float stop;
+} interval_t;
+
+
 /**
  * Stores the center angle as well as
  * the ramp-up and ramp-down angles of a flat-top interval
@@ -28,16 +35,22 @@ typedef struct
      * during initialization of this struct.
      */
     float angle_center;
-    float angle_start, angle_stop;
+    interval_t angle;
 
     /**
      * A factor between 0.0 and 1.0
      * which is multiplied with the difference of the momentary modulation and the maximum.
      */
     float ramp_value;
-    float angle_ramp_up_start, angle_ramp_up_stop;
-    float angle_ramp_down_start, angle_ramp_down_stop;
-
+    union
+    {
+        interval_t ramps[2];
+        struct
+        {
+            interval_t ramp_up;
+            interval_t ramp_down;
+        };
+    };
 } flat_top_interval_t;
 
 
@@ -49,8 +62,7 @@ typedef union
 {
     struct
     {
-        flat_top_interval_t top[3];
-        flat_top_interval_t bottom[3];
+        flat_top_interval_t interval[6];
 
         /**
          * The minimal modulation amplitude (between 0.0 and 1.0)
@@ -63,6 +75,11 @@ typedef union
          */
         float modulation_value_min;
         float modulation_value_max;
+    };
+    struct
+    {
+        flat_top_interval_t top[3];
+        flat_top_interval_t bottom[3];
     };
     struct
     {
