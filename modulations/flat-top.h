@@ -24,6 +24,7 @@ typedef struct
     float start;
     float stop;
     float center;
+    float width;
 } flat_top_interval_t;
 
 
