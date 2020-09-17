@@ -1,0 +1,23 @@
+
+# Generated
+*.o
+*.elf
+*.exe
+*.bin
+*.hex
+*.map
+*.lst
+*.log
+
+# IDE settings
+.project
+.cproject
+.pydevproject
+.metadata
+.settings
+.code_review_properties
+.mxproject
+*.elf.launch
+Debug
+Release
+
