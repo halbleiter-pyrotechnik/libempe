@@ -16,11 +16,15 @@
 #define FLATTOP_INDICATOR_ACTIVE_BOTTOM 0.0
 
 
+/**
+ * Helper struct for @ref flat_top_intervals_t
+ */
 typedef struct
 {
     float start;
     float stop;
-} interval_t;
+    float center;
+} flat_top_interval_t;
 
 
 /**
@@ -34,8 +38,7 @@ typedef struct
      * It's width i.e. start and stop angles are defined
      * during initialization of this struct.
      */
-    float angle_center;
-    interval_t angle;
+    flat_top_interval_t angle;
 
     /**
      * A factor between 0.0 and 1.0
@@ -44,14 +47,14 @@ typedef struct
     float ramp_value;
     union
     {
-        interval_t ramps[2];
+        flat_top_interval_t ramps[2];
         struct
         {
-            interval_t ramp_up;
-            interval_t ramp_down;
+            flat_top_interval_t ramp_up;
+            flat_top_interval_t ramp_down;
         };
     };
-} flat_top_interval_t;
+} flat_top_intervals_t;
 
 
 /**
@@ -62,7 +65,7 @@ typedef union
 {
     struct
     {
-        flat_top_interval_t interval[6];
+        flat_top_intervals_t interval[6];
 
         /**
          * The minimal modulation amplitude (between 0.0 and 1.0)
@@ -78,17 +81,17 @@ typedef union
     };
     struct
     {
-        flat_top_interval_t top[3];
-        flat_top_interval_t bottom[3];
+        flat_top_intervals_t top[3];
+        flat_top_intervals_t bottom[3];
     };
     struct
     {
-        flat_top_interval_t top_u;
-        flat_top_interval_t top_v;
-        flat_top_interval_t top_w;
-        flat_top_interval_t bottom_u;
-        flat_top_interval_t bottom_v;
-        flat_top_interval_t bottom_w;
+        flat_top_intervals_t top_u;
+        flat_top_intervals_t top_v;
+        flat_top_intervals_t top_w;
+        flat_top_intervals_t bottom_u;
+        flat_top_intervals_t bottom_v;
+        flat_top_intervals_t bottom_w;
     };
 } flat_top_parameters_t;
 

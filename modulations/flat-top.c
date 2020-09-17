@@ -21,6 +21,18 @@ static inline void normalize_angle(float* angle)
 }
 
 
+static inline void flat_top_expand_interval(
+        flat_top_interval_t* interval,
+        float span
+        )
+{
+    interval->start = interval->center - span;
+    normalize_angle(&interval->start);
+    interval->stop  = interval->center + span;
+    normalize_angle(&interval->stop);
+}
+
+
 void flat_top_init(
         flat_top_parameters_t* parameters,
         float flat_top_span,
@@ -31,26 +43,31 @@ void flat_top_init(
      * Angles for three-phase sine (not suitable for cosine!),
      * where angle_w > angle_v > angle_u
      */
-    parameters->top_u.angle_center = M_PI/2;
-    parameters->top_v.angle_center = M_PI/2 - RAD_120_DEGREE;
-    parameters->top_w.angle_center = M_PI/2 - 2*RAD_120_DEGREE;
+    parameters->top_u.angle.center = M_PI/2;
+    parameters->top_v.angle.center = M_PI/2 - RAD_120_DEGREE;
+    parameters->top_w.angle.center = M_PI/2 - 2*RAD_120_DEGREE;
 
     /*
      * Flat-bottom angles are 180 degrees phase-shifted from the flat-top angles
      */
     for (uint8_t i=0; i<3; i++)
-        parameters->bottom[i].angle_center = parameters->top[i].angle_center + M_PI;
+        parameters->bottom[i].angle.center = parameters->top[i].angle.center + M_PI;
 
     /*
      * Expand flat-bottom intervals using span value
      */
     for (uint8_t i=0; i<6; i++)
     {
-        normalize_angle(&parameters->interval[i].angle_center);
-        parameters->interval[i].angle.start = parameters->interval[i].angle_center - flat_top_span;
-        parameters->interval[i].angle.stop  = parameters->interval[i].angle_center + flat_top_span;
-        normalize_angle(&parameters->interval[i].angle.start);
-        normalize_angle(&parameters->interval[i].angle.stop);
+        normalize_angle(&parameters->interval[i].angle.center);
+        flat_top_expand_interval(&parameters->interval[i].angle, flat_top_span);
+
+        parameters->interval[i].ramp_up.center = parameters->interval[i].angle.start;
+        parameters->interval[i].ramp_down.center = parameters->interval[i].angle.stop;
+
+        for (uint8_t j=0; j<2; j++)
+        {
+            flat_top_expand_interval(&parameters->interval[i].ramps[j], ramp_span);
+        }
     }
 
     parameters->modulation_value_max = +1.0f;
@@ -65,7 +82,7 @@ void flat_top_init(
  */
 static inline bool angle_lies_within(
         float angle,
-        flat_top_interval_t* interval
+        flat_top_intervals_t* interval
         )
 {
     float upper_threshold = interval->angle.stop;
