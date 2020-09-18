@@ -79,6 +79,7 @@ void flat_top_init(
     parameters->modulation_value_max = +1.0f;
     parameters->modulation_value_min = -1.0f;
     parameters->modulation_threshold = 0.8;
+    parameters->enable_ramping = (ramp_span > 0.0);
 }
 
 
@@ -135,18 +136,25 @@ void flat_top_apply_ccm(
                 continue;
             }
 
-            float factor = 1.0;
-            if (angle_lies_within(theta, parameters->top[i].ramp_up.start, parameters->top[i].ramp_up.stop))
+            if (parameters->enable_ramping)
             {
-                factor = get_normalized_angle(theta - parameters->top[i].ramp_up.start) / parameters->top[i].ramp_up.width;
-                delta *= factor;
+                float factor = 1.0;
+                if (angle_lies_within(theta, parameters->top[i].ramp_up.start, parameters->top[i].ramp_up.stop))
+                {
+                    factor = get_normalized_angle(theta - parameters->top[i].ramp_up.start) / parameters->top[i].ramp_up.width;
+                    delta *= factor;
+                }
+                else if (angle_lies_within(theta, parameters->top[i].ramp_down.start, parameters->top[i].ramp_down.stop))
+                {
+                    factor = 1.0 - get_normalized_angle(theta - parameters->top[i].ramp_down.start) / parameters->top[i].ramp_down.width;
+                    delta *= factor;
+                }
+                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE + factor*FLATTOP_INDICATOR_INACTIVE);
             }
-            else if (angle_lies_within(theta, parameters->top[i].ramp_down.start, parameters->top[i].ramp_down.stop))
+            else
             {
-                factor = 1.0 - get_normalized_angle(theta - parameters->top[i].ramp_down.start) / parameters->top[i].ramp_down.width;
-                delta *= factor;
+                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_ACTIVE_TOP);
             }
-            set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE + factor*FLATTOP_INDICATOR_INACTIVE);
 
             modulation->value_u += delta;
             modulation->value_v += delta;
@@ -164,18 +172,25 @@ void flat_top_apply_ccm(
                 continue;
             }
 
-            float factor = 1.0;
-            if (angle_lies_within(theta, parameters->bottom[i].ramp_up.start, parameters->bottom[i].ramp_up.stop))
+            if (parameters->enable_ramping)
             {
-                factor = get_normalized_angle(theta - parameters->bottom[i].ramp_up.start) / parameters->bottom[i].ramp_up.width;
-                delta *= factor;
+                float factor = 1.0;
+                if (angle_lies_within(theta, parameters->bottom[i].ramp_up.start, parameters->bottom[i].ramp_up.stop))
+                {
+                    factor = get_normalized_angle(theta - parameters->bottom[i].ramp_up.start) / parameters->bottom[i].ramp_up.width;
+                    delta *= factor;
+                }
+                else if (angle_lies_within(theta, parameters->bottom[i].ramp_down.start, parameters->bottom[i].ramp_down.stop))
+                {
+                    factor = 1.0 - get_normalized_angle(theta - parameters->bottom[i].ramp_down.start) / parameters->bottom[i].ramp_down.width;
+                    delta *= factor;
+                }
+                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE - factor*FLATTOP_INDICATOR_INACTIVE);
             }
-            else if (angle_lies_within(theta, parameters->bottom[i].ramp_down.start, parameters->bottom[i].ramp_down.stop))
+            else
             {
-                factor = 1.0 - get_normalized_angle(theta - parameters->bottom[i].ramp_down.start) / parameters->bottom[i].ramp_down.width;
-                delta *= factor;
+                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_ACTIVE_BOTTOM);
             }
-            set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE - factor*FLATTOP_INDICATOR_INACTIVE);
 
             modulation->value_u -= delta;
             modulation->value_v -= delta;

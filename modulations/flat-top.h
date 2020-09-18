@@ -79,6 +79,12 @@ typedef union
          */
         float modulation_value_min;
         float modulation_value_max;
+
+        /*
+         * Ramping allows to gradually switch to flat-top mode
+         * instead of simply jumping to the maximum modulation
+         */
+        bool enable_ramping;
     };
     struct
     {
