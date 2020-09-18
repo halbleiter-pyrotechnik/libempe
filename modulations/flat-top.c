@@ -20,6 +20,12 @@ static inline void normalize_angle(float* angle)
         *angle -= (2 * M_PI);
 }
 
+static inline float get_normalized_angle(float angle)
+{
+    normalize_angle(&angle);
+    return angle;
+}
+
 
 static inline void flat_top_expand_interval(flat_top_interval_t* interval)
 {
@@ -132,12 +138,12 @@ void flat_top_apply_ccm(
             float factor = 1.0;
             if (angle_lies_within(theta, parameters->top[i].ramp_up.start, parameters->top[i].ramp_up.stop))
             {
-                factor = (theta - parameters->top[i].ramp_up.start) / parameters->top[i].ramp_up.width;
+                factor = get_normalized_angle(theta - parameters->top[i].ramp_up.start) / parameters->top[i].ramp_up.width;
                 delta *= factor;
             }
             else if (angle_lies_within(theta, parameters->top[i].ramp_down.start, parameters->top[i].ramp_down.stop))
             {
-                factor = 1.0 - (theta - parameters->top[i].ramp_down.start) / parameters->top[i].ramp_down.width;
+                factor = 1.0 - get_normalized_angle(theta - parameters->top[i].ramp_down.start) / parameters->top[i].ramp_down.width;
                 delta *= factor;
             }
             set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE + factor*FLATTOP_INDICATOR_INACTIVE);
@@ -161,12 +167,12 @@ void flat_top_apply_ccm(
             float factor = 1.0;
             if (angle_lies_within(theta, parameters->bottom[i].ramp_up.start, parameters->bottom[i].ramp_up.stop))
             {
-                factor = (theta - parameters->bottom[i].ramp_up.start) / parameters->bottom[i].ramp_up.width;
+                factor = get_normalized_angle(theta - parameters->bottom[i].ramp_up.start) / parameters->bottom[i].ramp_up.width;
                 delta *= factor;
             }
             else if (angle_lies_within(theta, parameters->bottom[i].ramp_down.start, parameters->bottom[i].ramp_down.stop))
             {
-                factor = 1.0 - (theta - parameters->bottom[i].ramp_down.start) / parameters->bottom[i].ramp_down.width;
+                factor = 1.0 - get_normalized_angle(theta - parameters->bottom[i].ramp_down.start) / parameters->bottom[i].ramp_down.width;
                 delta *= factor;
             }
             set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE - factor*FLATTOP_INDICATOR_INACTIVE);
