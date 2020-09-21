@@ -21,6 +21,7 @@
  */
 typedef struct
 {
+    float value;
     float start;
     float stop;
     float center;
@@ -51,8 +52,8 @@ typedef struct
         flat_top_interval_t ramps[2];
         struct
         {
-            flat_top_interval_t ramp_up;
-            flat_top_interval_t ramp_down;
+            flat_top_interval_t ramp_in;
+            flat_top_interval_t ramp_out;
         };
     };
 } flat_top_intervals_t;
@@ -108,8 +109,8 @@ typedef union
  */
 void flat_top_init(
         flat_top_parameters_t* parameters,
-        float flat_top_span,
-        float ramp_span
+        float flat_top_width,
+        float ramp_width
         );
 
 /**

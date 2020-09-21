@@ -38,8 +38,8 @@ static inline void flat_top_expand_interval(flat_top_interval_t* interval)
 
 void flat_top_init(
         flat_top_parameters_t* parameters,
-        float flat_top_span,
-        float ramp_span
+        float flat_top_width,
+        float ramp_width
         )
 {
     /*
@@ -63,15 +63,16 @@ void flat_top_init(
     {
         normalize_angle(&parameters->interval[i].angle.center);
 
-        parameters->interval[i].angle.width = 2*flat_top_span;
+        parameters->interval[i].angle.width = flat_top_width;
         flat_top_expand_interval(&parameters->interval[i].angle);
 
-        parameters->interval[i].ramp_up.center = parameters->interval[i].angle.start;
-        parameters->interval[i].ramp_down.center = parameters->interval[i].angle.stop;
+        parameters->interval[i].ramp_in.center = parameters->interval[i].angle.start;
+        parameters->interval[i].ramp_out.center = parameters->interval[i].angle.stop;
 
         for (uint8_t j=0; j<2; j++)
         {
-            parameters->interval[i].ramps[j].width = 2*ramp_span;
+            parameters->interval[i].ramps[j].value = 0.0;
+            parameters->interval[i].ramps[j].width = ramp_width;
             flat_top_expand_interval(&parameters->interval[i].ramps[j]);
         }
     }
@@ -79,7 +80,7 @@ void flat_top_init(
     parameters->modulation_value_max = +1.0f;
     parameters->modulation_value_min = -1.0f;
     parameters->modulation_threshold = 0.8;
-    parameters->enable_ramping = (ramp_span > 0.0);
+    parameters->enable_ramping = (ramp_width > 0.0);
 }
 
 
@@ -124,7 +125,7 @@ void flat_top_apply_ccm(
      */
     for (uint8_t i=0; i<3; i++)
     {
-        if (angle_lies_within(theta, parameters->top[i].ramp_up.start, parameters->top[i].ramp_down.stop))
+        if (angle_lies_within(theta, parameters->top[i].ramp_in.start, parameters->top[i].ramp_out.stop))
         {
             /*
              * Flat top mode
@@ -144,7 +145,7 @@ void flat_top_apply_ccm(
                     factor = get_normalized_angle(theta - parameters->top[i].ramp_up.start) / parameters->top[i].ramp_up.width;
                     delta *= factor;
                 }
-                else if (angle_lies_within(theta, parameters->top[i].ramp_down.start, parameters->top[i].ramp_down.stop))
+                else if (angle_lies_within(theta, parameters->top[i].ramp_out.start, parameters->top[i].ramp_out.stop))
                 {
                     factor = 1.0 - get_normalized_angle(theta - parameters->top[i].ramp_down.start) / parameters->top[i].ramp_down.width;
                     delta *= factor;
@@ -160,7 +161,7 @@ void flat_top_apply_ccm(
             modulation->value_v += delta;
             modulation->value_w += delta;
         }
-        else if (angle_lies_within(theta, parameters->bottom[i].ramp_up.start, parameters->bottom[i].ramp_down.stop))
+        else if (angle_lies_within(theta, parameters->bottom[i].ramp_in.start, parameters->bottom[i].ramp_out.stop))
         {
             /*
              * Flat bottom mode
@@ -180,7 +181,7 @@ void flat_top_apply_ccm(
                     factor = get_normalized_angle(theta - parameters->bottom[i].ramp_up.start) / parameters->bottom[i].ramp_up.width;
                     delta *= factor;
                 }
-                else if (angle_lies_within(theta, parameters->bottom[i].ramp_down.start, parameters->bottom[i].ramp_down.stop))
+                else if (angle_lies_within(theta, parameters->bottom[i].ramp_out.start, parameters->bottom[i].ramp_out.stop))
                 {
                     factor = 1.0 - get_normalized_angle(theta - parameters->bottom[i].ramp_down.start) / parameters->bottom[i].ramp_down.width;
                     delta *= factor;

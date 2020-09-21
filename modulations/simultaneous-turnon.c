@@ -16,11 +16,12 @@ void update_switching_mode(
 
     switching_mode_e result = SIMULTANEOUS_LOWSIDE_TURNON;
 
-    static const float threshold5 = 5.0/6.0 * M_TWOPI;
-    static const float threshold4 = 4.0/6.0 * M_TWOPI;
-    static const float threshold3 = 3.0/6.0 * M_TWOPI;
-    static const float threshold2 = 2.0/6.0 * M_TWOPI;
-    static const float threshold1 = 1.0/6.0 * M_TWOPI;
+    const float shift = 0; //- M_PI / 42.0;
+    static const float threshold5 = 5.0/6.0 * M_TWOPI - shift;
+    static const float threshold4 = 4.0/6.0 * M_TWOPI - shift;
+    static const float threshold3 = 3.0/6.0 * M_TWOPI - shift;
+    static const float threshold2 = 2.0/6.0 * M_TWOPI - shift;
+    static const float threshold1 = 1.0/6.0 * M_TWOPI - shift;
 
     if (phase_angle_rad > threshold5)
         result = SIMULTANEOUS_HIGHSIDE_TURNON;
