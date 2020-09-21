@@ -126,6 +126,7 @@ void flat_top_apply_ccm(
     /*
      * For all three phases determine whether to switch to flat top mode or not
      */
+    const float flat_top_step = 0.35;
     for (uint8_t i=0; i<3; i++)
     {
         if (angle_lies_within(theta, parameters->top[i].ramp_in.start, parameters->top[i].ramp_out.stop))
@@ -143,21 +144,21 @@ void flat_top_apply_ccm(
             float flag = 0.5;
             if (parameters->enable_ramping)
             {
-                const float step = 0.35;
                 if (angle_lies_within(theta, parameters->top[i].ramp_in.start, parameters->top[i].ramp_in.stop))
                 {
-//                    delta *= parameters->top[i].ramp_in.value;
-                    delta = parameters->top[i].ramp_in.value;
+                    delta *= parameters->top[i].ramp_in.value;
+//                    delta = parameters->top[i].ramp_in.value;
                     flag = parameters->top[i].ramp_in.value * FLATTOP_INDICATOR_INACTIVE;
-                    parameters->top[i].ramp_in.value += step;
+                    parameters->top[i].ramp_in.value += flat_top_step;
                     if (parameters->top[i].ramp_in.value > 1.0)
                         parameters->top[i].ramp_in.value = 1.0;
                 }
                 else if (angle_lies_within(theta, parameters->top[i].ramp_out.start, parameters->top[i].ramp_out.stop))
                 {
                     delta *= parameters->top[i].ramp_out.value;
+//                    delta = parameters->top[i].ramp_out.value;
                     flag = parameters->top[i].ramp_out.value * FLATTOP_INDICATOR_INACTIVE;
-                    parameters->top[i].ramp_out.value -= step;
+                    parameters->top[i].ramp_out.value -= flat_top_step;
                     if (parameters->top[i].ramp_out.value < 0.0)
                         parameters->top[i].ramp_out.value = 0.0;
                 }
@@ -188,20 +189,21 @@ void flat_top_apply_ccm(
             float flag = -0.5;
             if (parameters->enable_ramping)
             {
-                const float step = 0.3;
                 if (angle_lies_within(theta, parameters->bottom[i].ramp_in.start, parameters->bottom[i].ramp_in.stop))
                 {
                     delta *= parameters->bottom[i].ramp_in.value;
+//                    delta = parameters->bottom[i].ramp_in.value;
                     flag = -1.0 * parameters->bottom[i].ramp_in.value * FLATTOP_INDICATOR_INACTIVE;
-                    parameters->bottom[i].ramp_in.value += step;
+                    parameters->bottom[i].ramp_in.value += flat_top_step;
                     if (parameters->bottom[i].ramp_in.value > 1.0)
                         parameters->bottom[i].ramp_in.value = 1.0;
                 }
                 else if (angle_lies_within(theta, parameters->bottom[i].ramp_out.start, parameters->bottom[i].ramp_out.stop))
                 {
                     delta *= parameters->bottom[i].ramp_out.value;
+//                    delta = parameters->bottom[i].ramp_out.value;
                     flag = -1.0 * parameters->bottom[i].ramp_out.value * FLATTOP_INDICATOR_INACTIVE;
-                    parameters->bottom[i].ramp_out.value -= step;
+                    parameters->bottom[i].ramp_out.value -= flat_top_step;
                     if (parameters->bottom[i].ramp_out.value < 0.0)
                         parameters->bottom[i].ramp_out.value = 0.0;
                 }
