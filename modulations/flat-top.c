@@ -69,9 +69,13 @@ void flat_top_init(
         parameters->interval[i].ramp_in.center = parameters->interval[i].angle.start;
         parameters->interval[i].ramp_out.center = parameters->interval[i].angle.stop;
 
+        // Ramping into flat-top from 0.0 up to 1.0
+        parameters->interval[i].ramp_in.value = 0.0;
+        // Ramping out of flat-top from 1.0 downto 0.0
+        parameters->interval[i].ramp_out.value = 1.0;
+
         for (uint8_t j=0; j<2; j++)
         {
-            parameters->interval[i].ramps[j].value = 0.0;
             parameters->interval[i].ramps[j].width = ramp_width;
             flat_top_expand_interval(&parameters->interval[i].ramps[j]);
         }
