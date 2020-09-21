@@ -108,14 +108,17 @@ void flat_top_apply_ccm(
         float theta
         )
 {
-    if (modulation_amplitude < parameters->modulation_threshold)
-        return;
-
     const debug_value_e flat_top_indicator[] = {
         PFC_FLATTOP_INDICATOR_U,
         PFC_FLATTOP_INDICATOR_V,
         PFC_FLATTOP_INDICATOR_W
         };
+
+    for (uint8_t i=0; i<3; i++)
+        set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE);
+
+    if (modulation_amplitude < parameters->modulation_threshold)
+        return;
 
     // All pre-configured angles are normalized.
     normalize_angle(&theta);
@@ -213,13 +216,6 @@ void flat_top_apply_ccm(
             modulation->value_u -= delta;
             modulation->value_v -= delta;
             modulation->value_w -= delta;
-        }
-        else
-        {
-            /*
-             * Inbetween flat top and flat bottom
-             */
-            set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE);
         }
     }
 }
