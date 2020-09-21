@@ -137,25 +137,34 @@ void flat_top_apply_ccm(
                 continue;
             }
 
+            float flag = 0.5;
             if (parameters->enable_ramping)
             {
-                float factor = 1.0;
-                if (angle_lies_within(theta, parameters->top[i].ramp_up.start, parameters->top[i].ramp_up.stop))
+                const float step = 0.35;
+                if (angle_lies_within(theta, parameters->top[i].ramp_in.start, parameters->top[i].ramp_in.stop))
                 {
-                    factor = get_normalized_angle(theta - parameters->top[i].ramp_up.start) / parameters->top[i].ramp_up.width;
-                    delta *= factor;
+//                    delta *= parameters->top[i].ramp_in.value;
+                    delta = parameters->top[i].ramp_in.value;
+                    flag = parameters->top[i].ramp_in.value * FLATTOP_INDICATOR_INACTIVE;
+                    parameters->top[i].ramp_in.value += step;
+                    if (parameters->top[i].ramp_in.value > 1.0)
+                        parameters->top[i].ramp_in.value = 1.0;
                 }
                 else if (angle_lies_within(theta, parameters->top[i].ramp_out.start, parameters->top[i].ramp_out.stop))
                 {
-                    factor = 1.0 - get_normalized_angle(theta - parameters->top[i].ramp_down.start) / parameters->top[i].ramp_down.width;
-                    delta *= factor;
+                    delta *= parameters->top[i].ramp_out.value;
+                    flag = parameters->top[i].ramp_out.value * FLATTOP_INDICATOR_INACTIVE;
+                    parameters->top[i].ramp_out.value -= step;
+                    if (parameters->top[i].ramp_out.value < 0.0)
+                        parameters->top[i].ramp_out.value = 0.0;
                 }
-                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE + factor*FLATTOP_INDICATOR_INACTIVE);
+                else
+                {
+                    parameters->top[i].ramp_in.value = 0.0;
+                    parameters->top[i].ramp_out.value = 1.0;
+                }
             }
-            else
-            {
-                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_ACTIVE_TOP);
-            }
+            set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE + flag);
 
             modulation->value_u += delta;
             modulation->value_v += delta;
@@ -173,25 +182,33 @@ void flat_top_apply_ccm(
                 continue;
             }
 
+            float flag = -0.5;
             if (parameters->enable_ramping)
             {
-                float factor = 1.0;
-                if (angle_lies_within(theta, parameters->bottom[i].ramp_up.start, parameters->bottom[i].ramp_up.stop))
+                const float step = 0.3;
+                if (angle_lies_within(theta, parameters->bottom[i].ramp_in.start, parameters->bottom[i].ramp_in.stop))
                 {
-                    factor = get_normalized_angle(theta - parameters->bottom[i].ramp_up.start) / parameters->bottom[i].ramp_up.width;
-                    delta *= factor;
+                    delta *= parameters->bottom[i].ramp_in.value;
+                    flag = -1.0 * parameters->bottom[i].ramp_in.value * FLATTOP_INDICATOR_INACTIVE;
+                    parameters->bottom[i].ramp_in.value += step;
+                    if (parameters->bottom[i].ramp_in.value > 1.0)
+                        parameters->bottom[i].ramp_in.value = 1.0;
                 }
                 else if (angle_lies_within(theta, parameters->bottom[i].ramp_out.start, parameters->bottom[i].ramp_out.stop))
                 {
-                    factor = 1.0 - get_normalized_angle(theta - parameters->bottom[i].ramp_down.start) / parameters->bottom[i].ramp_down.width;
-                    delta *= factor;
+                    delta *= parameters->bottom[i].ramp_out.value;
+                    flag = -1.0 * parameters->bottom[i].ramp_out.value * FLATTOP_INDICATOR_INACTIVE;
+                    parameters->bottom[i].ramp_out.value -= step;
+                    if (parameters->bottom[i].ramp_out.value < 0.0)
+                        parameters->bottom[i].ramp_out.value = 0.0;
                 }
-                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE - factor*FLATTOP_INDICATOR_INACTIVE);
+                else
+                {
+                    parameters->bottom[i].ramp_in.value = 0.0;
+                    parameters->bottom[i].ramp_out.value = 1.0;
+                }
             }
-            else
-            {
-                set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_ACTIVE_BOTTOM);
-            }
+            set_debug_value(flat_top_indicator[i], FLATTOP_INDICATOR_INACTIVE + flag);
 
             modulation->value_u -= delta;
             modulation->value_v -= delta;
