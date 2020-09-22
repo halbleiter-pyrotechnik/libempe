@@ -26,8 +26,18 @@ and must hence be implemented within the project.
 ### How does it work
 
 The code in this library contains types and functions
-to store, access, modify and convert arbitrary
+to store, access, modify and convert arbitrary values as
 floating point integers (floats).
+A value can be any abstract or imaginable quantity,
+that is in any way acquired, stored or calculated within the firmware,
+e.g. ADC values or calculated duty cycles.
+An arbitrary number of values can be tracked during runtime.
+Each value can be selected for transmission to a DAC.
+This selection can happen either at firmware startup and remain unchanged,
+but can also be changed during runtime,
+e.g. by command received via a user interface.
+New values are periodically transmitted to the respective, selected DACs.
+
 It is assumed, that the raw value being sent to a DAC
 will be required in the form of an unsigned integer (uint),
 as it is the case for most DACs.
@@ -37,9 +47,9 @@ i.e. the transmission of converted, raw values
 via the hardware interface,
 floats are converted to uint16_t using a linear function
 between minimum and maximum value boundaries.
-Those are independently configurable for each debug value
-(and must be configured in the
-initialization phase of the firmware), e.g.:
+The latter values must be configured for each debug value.
+It is recommenend to do this
+during the initialization phase of the firmware, e.g.:
 
 ~~~
 void init_analog_debugger()
@@ -56,11 +66,16 @@ void init_analog_debugger()
 }
 ~~~
 
-The general idea is, that anywhere within the main code
-values can be stored for analog debugging using the function set_debug_value(), e.g.:
+The general idea is, that during runtime anywhere within the code
+values can be stored for analog debugging
+using the function set_debug_value(), e.g.:
+
 ~~~
 ...
+float voltage = sensor_get_voltage();
 set_debug_value(DEBUG_VOLTAGE, voltage);
+
+float current = sensor_get_current();
 set_debug_value(DEBUG_CURRENT, current);
 
 float power = voltage * current;
