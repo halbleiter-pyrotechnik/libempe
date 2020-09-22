@@ -81,8 +81,8 @@ void flat_top_init(
         }
     }
 
-    parameters->modulation_value_max = +1.0f;
-    parameters->modulation_value_min = -1.0f;
+    parameters->modulation_margin_max = +1.0f;
+    parameters->modulation_margin_min = -1.0f;
     parameters->modulation_threshold = 0.8;
     parameters->enable_ramping = (ramp_width > 0.0);
 }
@@ -137,15 +137,12 @@ void flat_top_apply_ccm(
         {
             /*
              * Flat top mode
+             *
+             * NOTE: delta becomes negative in case of over-modulation.
              */
-            float delta = parameters->modulation_value_max - modulation->value[i];
-            if (delta < 0.0f)
-            {
-                // That's an error.
-                continue;
-            }
+            float delta = parameters->modulation_margin_max - modulation->value[i];
 
-            float flag = 0.5;
+            float flag = FLATTOP_INDICATOR_INACTIVE;
             if (parameters->enable_ramping)
             {
                 if (angle_lies_within(theta, parameters->top[i].ramp_in.start, parameters->top[i].ramp_in.stop))
@@ -181,14 +178,9 @@ void flat_top_apply_ccm(
             /*
              * Flat bottom mode
              */
-            float delta = modulation->value[i] - parameters->modulation_value_min;
-            if (delta < 0.0f)
-            {
-                // That's an error.
-                continue;
-            }
+            float delta = modulation->value[i] - parameters->modulation_margin_min;
 
-            float flag = -0.5;
+            float flag = -FLATTOP_INDICATOR_INACTIVE;
             if (parameters->enable_ramping)
             {
                 if (angle_lies_within(theta, parameters->bottom[i].ramp_in.start, parameters->bottom[i].ramp_in.stop))

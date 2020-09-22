@@ -76,10 +76,10 @@ typedef union
         float modulation_threshold;
 
         /**
-         * The margins to which to adjust the modulation during flat-top
+         * The margins to which the modulation amplitude is clipped during flat-top
          */
-        float modulation_value_min;
-        float modulation_value_max;
+        float modulation_margin_min;
+        float modulation_margin_max;
 
         /*
          * Ramping allows to gradually switch to flat-top mode
