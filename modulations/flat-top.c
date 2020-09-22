@@ -151,7 +151,6 @@ void flat_top_apply_ccm(
                 if (angle_lies_within(theta, parameters->top[i].ramp_in.start, parameters->top[i].ramp_in.stop))
                 {
                     delta *= parameters->top[i].ramp_in.value;
-//                    delta = parameters->top[i].ramp_in.value;
                     flag = parameters->top[i].ramp_in.value * FLATTOP_INDICATOR_INACTIVE;
                     parameters->top[i].ramp_in.value += flat_top_step;
                     if (parameters->top[i].ramp_in.value > 1.0)
@@ -160,7 +159,6 @@ void flat_top_apply_ccm(
                 else if (angle_lies_within(theta, parameters->top[i].ramp_out.start, parameters->top[i].ramp_out.stop))
                 {
                     delta *= parameters->top[i].ramp_out.value;
-//                    delta = parameters->top[i].ramp_out.value;
                     flag = parameters->top[i].ramp_out.value * FLATTOP_INDICATOR_INACTIVE;
                     parameters->top[i].ramp_out.value -= flat_top_step;
                     if (parameters->top[i].ramp_out.value < 0.0)
@@ -196,7 +194,6 @@ void flat_top_apply_ccm(
                 if (angle_lies_within(theta, parameters->bottom[i].ramp_in.start, parameters->bottom[i].ramp_in.stop))
                 {
                     delta *= parameters->bottom[i].ramp_in.value;
-//                    delta = parameters->bottom[i].ramp_in.value;
                     flag = -1.0 * parameters->bottom[i].ramp_in.value * FLATTOP_INDICATOR_INACTIVE;
                     parameters->bottom[i].ramp_in.value += flat_top_step;
                     if (parameters->bottom[i].ramp_in.value > 1.0)
@@ -205,7 +202,6 @@ void flat_top_apply_ccm(
                 else if (angle_lies_within(theta, parameters->bottom[i].ramp_out.start, parameters->bottom[i].ramp_out.stop))
                 {
                     delta *= parameters->bottom[i].ramp_out.value;
-//                    delta = parameters->bottom[i].ramp_out.value;
                     flag = -1.0 * parameters->bottom[i].ramp_out.value * FLATTOP_INDICATOR_INACTIVE;
                     parameters->bottom[i].ramp_out.value -= flat_top_step;
                     if (parameters->bottom[i].ramp_out.value < 0.0)
