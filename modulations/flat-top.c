@@ -5,7 +5,7 @@
 #include "flat-top.h"
 #include <stdint.h>
 #include <math.h>
-#include "values/debugging/debug.h"
+#include "../debugging/debug.h"
 #include "sine.h"
 
 
