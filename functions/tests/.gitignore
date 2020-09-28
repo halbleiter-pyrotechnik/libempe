@@ -1,0 +1,14 @@
+
+*.o
+*.elf
+
+*.csv
+*.m
+*.pdf
+*.eps
+*.ps
+*.png
+*.jpg
+*.tif
+*.tiff
+
