@@ -18,7 +18,12 @@ void sawtooth_init(
             frequency_update
             );
 
-    sawtooth->slope = (value_stop - value_start) / sawtooth->f.step_count;
+    /*
+     * The value must reach it's maximum one increment before
+     * the period is fully elapsed so that it can be zero again
+     * in the following step.
+     */
+    sawtooth->slope = (value_stop - value_start) / (M_2x_PI - sawtooth->f.angle_increment);
 }
 
 

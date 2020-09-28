@@ -59,7 +59,7 @@ void function_step(function_t* f)
     }
 
     f->step += 1.0;
-    while (f->step > f->step_count)
+    while (f->step >= f->step_count)
     {
         f->step -= f->step_count;
         if (f->repetition_count > 0)

@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <math.h>
 #include "sawtooth.h"
 
 void test_sawtooth(char* filename)
@@ -12,10 +13,10 @@ void test_sawtooth(char* filename)
      * Test function parameters
      */
     const float value_start = -3.0;
-    const float value_stop = 42.0;
+    const float value_stop = 5.0;
     const float frequency_function = 50.0;
-    const float frequency_update = 14e3;
-    const float runtime = 0.25;
+    const float frequency_update = 1e3;
+    const float runtime = 0.2;
 
     sawtooth_t function;
     sawtooth_init(
