@@ -36,5 +36,13 @@ void convert_ccm_modulation_to_dutycycles(modulation_values_ccm_t*, dutycycles_t
  */
 void add_complementary_lowside_dutycycles_ccm(dutycycles_threephase_t*);
 
+/**
+ * Adds a function value to every phase
+ *
+ * @param angle     Current phase angle of the first phase in rad.
+ *                  Incremented by 2/3*pi for the remaining two phases.
+ */
+void modulation_imprint_function(modulation_values_ccm_t*, function_t*, float angle);
+
 
 #endif

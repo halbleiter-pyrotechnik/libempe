@@ -33,3 +33,25 @@ inline void convert_ccm_modulation_to_dutycycles(
 
     add_complementary_lowside_dutycycles_ccm(setpoints);
 }
+
+
+void modulation_imprint_function(
+        modulation_values_ccm_t* m,
+        function_t* f,
+        float angle
+        )
+{
+    if (m == 0)
+        return;
+    if (f == 0)
+        return;
+    if (f->get_value_by_angle == 0)
+        return;
+
+    for (uint8_t i=0; i<3; i++)
+    {
+        m->value[i] += (*f->get_value_by_angle)(f, angle);
+        angle += M_PI_2_3;
+    }
+}
+
