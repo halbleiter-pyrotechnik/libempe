@@ -15,4 +15,5 @@
 int main()
 {
     test_sawtooth("sawtooth.csv");
+    test_ramp("ramp.csv");
 }

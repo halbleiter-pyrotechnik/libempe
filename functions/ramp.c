@@ -18,6 +18,9 @@ void ramp_init(
             update_frequency
             );
 
+    // Actually reach 2*pi when one period is elapsed
+    ramp->f.angle_increment *= ramp->f.step_count / (ramp->f.step_count+1);
+    // Run only once
     ramp->f.repetition_count = 1;
 }
 

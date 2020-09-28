@@ -44,7 +44,7 @@ void function_set_frequency(
     if (f->function_frequency != 0.0)
         f->step_count = f->update_frequency / f->function_frequency;
 
-    f->angle_increment = (1.0 / f->step_count) * M_2x_PI;
+    f->angle_increment = M_2x_PI / f->step_count;
 }
 
 
@@ -69,6 +69,6 @@ void function_step(function_t* f)
     f->angle += f->angle_increment;
     while (f->angle < 0.0)
         f->angle += M_2x_PI;
-    while (f->angle > M_2x_PI)
+    while (f->angle >= M_2x_PI)
         f->angle -= M_2x_PI;
 }

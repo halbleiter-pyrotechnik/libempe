@@ -9,4 +9,9 @@
  */
 void test_sawtooth(char* filename);
 
+/**
+ * Simulate a ramp and save the the values to file
+ */
+void test_ramp(char* filename);
+
 #endif
