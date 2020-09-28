@@ -3,12 +3,12 @@
 #define RAMP_H
 
 
-#include "function.h"
+#include "sawtooth.h"
 
 /**
- * A ramp is simply a function
+ * A ramp is a sawtooth function that runs only once
  */
-typedef function_t ramp_t;
+typedef sawtooth_t ramp_t;
 
 
 /**
