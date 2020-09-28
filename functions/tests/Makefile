@@ -7,10 +7,10 @@ all: plot
 
 plot: $(OBJ)
 	./$(OBJ)
-	$(OCTAVE) evaluate.m
+	$(OCTAVE) test_all.m
 
 $(OBJ): $(wildcard *.c ../*.c)
 	$(CC) $^ $(CFLAGS) -o $@
 
 clean:
-	rm -f *.csv *.o test.elf
+	rm -f *.csv *.jpg *.png *.pdf *.o test.elf

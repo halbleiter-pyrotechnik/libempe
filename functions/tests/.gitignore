@@ -3,7 +3,6 @@
 *.elf
 
 *.csv
-*.m
 *.pdf
 *.eps
 *.ps

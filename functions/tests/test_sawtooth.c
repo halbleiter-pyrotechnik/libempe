@@ -32,7 +32,11 @@ void test_sawtooth(char* filename)
         // Calculate momentary function value
         sawtooth_update(&function);
 
-        fprintf(f, "%d;%.2f;\n", i, function.f.value);
+        fprintf(f, "%d;%.2f;%.2f;\n",
+                i,
+                function.f.angle,
+                function.f.value
+                );
 
         // Increment function by one step
         function_step(&function.f);
