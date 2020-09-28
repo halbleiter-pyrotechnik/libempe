@@ -17,7 +17,7 @@
 
 
 #ifndef PI_x2
-#define PI_x2 6.283185307179586f
+#define M_2x_PI 6.283185307179586f
 #endif
 
 #ifndef SQRT2

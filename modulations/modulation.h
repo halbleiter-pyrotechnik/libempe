@@ -7,9 +7,15 @@
 #ifndef MODULATION_H
 #define MODULATION_H
 
-
 #include "values/setpoints.h"
 #include "../transformations/alphabeta.h"
+#include "../functions/function.h"
+
+
+#ifndef M_PI_2_3
+#define M_PI_2_3 2.0943951023931953
+#endif
+
 
 /**
  * One needs three modulation values for one three-phase inverter system

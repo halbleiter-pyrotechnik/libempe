@@ -16,7 +16,7 @@ void uf_control_init(
     sawtooth_init(
             &uf->sine_angle,
             0.0,
-            PI_x2,
+            M_2x_PI,
             init->desired_frequency,
             init->update_frequency
             );
@@ -74,7 +74,7 @@ float uf_control_run(
      */
     ramp_update(&uf->frequency);
     ramp_update(&uf->voltage_rms);
-    sawtooth_set_frequency(&uf->sine_angle, uf->frequency.value);
+    function_set_frequency(&uf->sine_angle.f, uf->frequency.f.value);
     sawtooth_update(&uf->sine_angle);
 
     /*
@@ -84,15 +84,15 @@ float uf_control_run(
     if (uf->update_modulation_factor_from_dclink_voltage)
     {
          M = uf_calculate_modulation_factor(
-                uf->voltage_rms.value,
+                uf->voltage_rms.f.value,
                 dclink_voltage
                 );
-        uf->modulation_factor.value = M;
+        uf->modulation_factor.f.value = M;
     }
     else
     {
         ramp_update(&uf->modulation_factor);
-        M = uf->modulation_factor.value;
+        M = uf->modulation_factor.f.value;
     }
 
     /*
@@ -111,7 +111,7 @@ float uf_control_run(
      * Realize continous current mode (CCM):
      * Highside on-time + Lowside on-time = 1.0
      */
-    sine_modulate_ccm(uf->sine_angle.value, M, setpoints);
+    sine_modulate_ccm(uf->sine_angle.f.value, M, setpoints);
 
     return M;
 }
