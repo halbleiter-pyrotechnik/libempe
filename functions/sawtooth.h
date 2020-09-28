@@ -6,21 +6,20 @@
 #include "function.h"
 
 /**
- * A sawtooth is simply a function
+ * A sawtooth is a function with a slope
  */
-typedef function_t sawtooth_t;
-
-
-#ifndef PI_x2
-#define PI_x2 6.283185307179586f
-#endif
+typedef struct
+{
+    function_t f;
+    float slope;
+} sawtooth_t;
 
 
 /**
  * This calculates all sawtooth function parameters from the
  * desired frequency and the frequency of update function invokation.
- * If (value_start < value_stop) then the increment is positive (rising sawtooth),
- * otherwise the increment is negative (falling sawtooth).
+ * If (value_start < value_stop) then the slope i.e. increment is positive (rising sawtooth),
+ * otherwise the slope i.e. increment is negative (falling sawtooth).
  */
 void sawtooth_init(
         sawtooth_t*,
@@ -29,11 +28,6 @@ void sawtooth_init(
         float f_desired,
         float f_update
         );
-
-/**
- * Sets a new sawtooth frequency and adjusts the stepsize accordingly
- */
-void sawtooth_set_frequency(sawtooth_t*, float f_desired);
 
 /**
  * This function increments the sawtooth function's current value

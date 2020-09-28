@@ -3,53 +3,41 @@
 
 
 void sawtooth_init(
-        sawtooth_t* f,
+        sawtooth_t* sawtooth,
         float value_start,
         float value_stop,
-        float f_desired,
-        float f_update
+        float frequency_function,
+        float frequency_update
         )
 {
-    f->value_min = value_start;
-    f->value_max = value_stop;
-    f->value_delta = value_stop - value_start;
-    f->update_frequency = f_update;
-    sawtooth_set_frequency(f, f_desired);
+    function_init(
+            &sawtooth->f,
+            value_start,
+            value_stop,
+            frequency_function,
+            frequency_update
+            );
+
+    sawtooth->slope = (value_stop - value_start) / sawtooth->f.step_count;
 }
 
 
-void sawtooth_set_frequency(sawtooth_t* f, float f_desired)
+float sawtooth_update(sawtooth_t* sawtooth)
 {
-    f->function_frequency = f_desired;
-
-    if (f->function_frequency != 0.0)
-        f->stepcount = f->update_frequency / f->function_frequency;
-    else
-        f->stepcount = 0.0;
-
-    if (f->stepcount != 0.0)
-        f->value_increment = f->value_delta / f->stepcount;
-    else
-        f->value_increment = 0.0;
-}
-
-
-float sawtooth_update(sawtooth_t* f)
-{
-    f->value += f->value_increment;
-
-    if (f->value_increment > 0.0)
+    if (sawtooth->slope > 0.0)
     {
         // Rising sawtooth
-        if (f->value > f->value_max)
-            f->value = f->value_min;
+        sawtooth->f.value = sawtooth->f.value_min + sawtooth->f.angle * sawtooth->slope;
+        if (sawtooth->f.value > sawtooth->f.value_max)
+            sawtooth->f.value = sawtooth->f.value_max;
     }
-    else if (f->value_increment < 0.0)
+    else
     {
         // Falling sawtooth
-        if (f->value < f->value_min)
-            f->value = f->value_max;
+        sawtooth->f.value = sawtooth->f.value_max + sawtooth->f.angle * sawtooth->slope;
+        if (sawtooth->f.value < sawtooth->f.value_min)
+            sawtooth->f.value = sawtooth->f.value_min;
     }
 
-    return f->value;
+    return sawtooth->f.value;
 }
