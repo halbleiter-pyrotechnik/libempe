@@ -77,5 +77,6 @@ for filename in $files; do
 	newname=$(echo -n $ls | awk -v delta_hours=$delta_hours -v delta_minutes=$delta_minutes {"$script"})
 
 	echo $filename - $cdate - $ctime " -> " $newname
+	mv -v "$filename" "$newname"
 done
 
