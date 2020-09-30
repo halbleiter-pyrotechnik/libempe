@@ -16,4 +16,6 @@ int main()
 {
     test_sawtooth("sawtooth.csv");
     test_ramp("ramp.csv");
+    test_triangle("triangle.csv");
+    test_trapezoid("trapezoid.csv");
 }
