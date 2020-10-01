@@ -16,7 +16,7 @@
 #include "modulation.h"
 
 
-#ifndef PI_x2
+#ifndef M_2x_PI
 #define M_2x_PI 6.283185307179586f
 #endif
 
