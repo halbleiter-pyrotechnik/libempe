@@ -37,7 +37,7 @@ inline void convert_ccm_modulation_to_dutycycles(
 
 void modulation_imprint_function(
         modulation_values_ccm_t* m,
-        function_t* f,
+        trapezoid_t* f,
         float angle
         )
 {
@@ -45,12 +45,12 @@ void modulation_imprint_function(
         return;
     if (f == 0)
         return;
-    if (f->get_value_by_angle == 0)
-        return;
 
+    f->f.angle = angle;
+    float bias = trapezoid_update(f);
     for (uint8_t i=0; i<3; i++)
     {
-        m->value[i] += (*f->get_value_by_angle)(f, angle);
+        m->value[i] += bias;
         angle += M_PI_2_3;
     }
 }

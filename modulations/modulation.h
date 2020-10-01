@@ -9,7 +9,7 @@
 
 #include "values/setpoints.h"
 #include "../transformations/alphabeta.h"
-#include "../functions/function.h"
+#include "../functions/trapezoid.h"
 
 
 #ifndef M_PI_2_3
@@ -42,7 +42,11 @@ void add_complementary_lowside_dutycycles_ccm(dutycycles_threephase_t*);
  * @param angle     Current phase angle of the first phase in rad.
  *                  Incremented by 2/3*pi for the remaining two phases.
  */
-void modulation_imprint_function(modulation_values_ccm_t*, function_t*, float angle);
+void modulation_imprint_function(
+        modulation_values_ccm_t*,
+        trapezoid_t*,
+        float angle
+        );
 
 
 #endif
