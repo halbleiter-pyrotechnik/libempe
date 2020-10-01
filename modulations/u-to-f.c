@@ -72,9 +72,12 @@ float uf_control_run(
     /*
      * Advance phase angle, voltage ramp and frequency ramp by one step each
      */
+    function_step(&uf->frequency.f);
     ramp_update(&uf->frequency);
+    function_step(&uf->voltage_rms.f);
     ramp_update(&uf->voltage_rms);
     function_set_frequency(&uf->sine_angle.f, uf->frequency.f.value);
+    function_step(&uf->sine_angle.f);
     sawtooth_update(&uf->sine_angle);
 
     /*
@@ -91,6 +94,7 @@ float uf_control_run(
     }
     else
     {
+        function_step(&uf->modulation_factor.f);
         ramp_update(&uf->modulation_factor);
         M = uf->modulation_factor.f.value;
     }
@@ -111,7 +115,11 @@ float uf_control_run(
      * Realize continous current mode (CCM):
      * Highside on-time + Lowside on-time = 1.0
      */
-    sine_modulate_ccm(uf->sine_angle.f.value, M, setpoints);
+    sine_modulate_ccm(
+            uf->sine_angle.f.value,
+            M,
+            setpoints
+            );
 
     return M;
 }
