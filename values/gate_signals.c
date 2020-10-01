@@ -241,6 +241,20 @@ void gate_signals_calculate_halfbridge(
         }
     }
 
+    /*
+     * Simplify tick numbers if possible
+     */
+    if (dutycycle_highside == 0.0)
+    {
+        gate_signals->tick_number_highside_rising = ticks_max;
+        gate_signals->tick_number_highside_falling = ticks_max;
+    }
+    if (dutycycle_lowside == 0.0)
+    {
+        gate_signals->tick_number_lowside_rising = ticks_max;
+        gate_signals->tick_number_lowside_falling = ticks_max;
+    }
+
     *state = new_state;
 }
 
