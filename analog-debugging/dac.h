@@ -10,6 +10,12 @@
 #include "debug.h"
 
 /*
+ * The raw DAC values may be written in reverse order,
+ * when the SPI/DMA setup transfers words from last to first.
+ */
+//#define DAC_CHANNELS_REVERSE_ORDER
+
+/*
  * The developer must have a file named analog-debugger.h in his/her project,
  * in which type dac_channel_e is declared enumerating all available DAC channels,
  * see also: analog-debugger.h.template

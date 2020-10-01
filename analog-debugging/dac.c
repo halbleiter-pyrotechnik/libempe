@@ -81,7 +81,7 @@ inline void write_debug_values_to_output(
 {
     if (auto_adjust_min_max)
     {
-        for (uint8_t i=0; i<4; i++)
+        for (uint8_t i=0; i<DAC_CHANNEL_COUNT; i++)
         {
             debug_value_adjust_range(dac_values[i]);
         }
@@ -89,11 +89,11 @@ inline void write_debug_values_to_output(
 
     for (uint8_t i=0; i<4; i++)
     {
-        /*
-         * The DAC indices are in inverse order in the raw data stream,
-         * because the SPI DMA transfers the highest array index first.
-         */
-        raw_setpoints->value_dac[3-i] = convert_dac_value_to_raw(dac_values[i]);
+#ifdef DAC_CHANNELS_REVERSE_ORDER
+        raw_setpoints->value_dac[DAC_CHANNEL_COUNT-1-i] = convert_dac_value_to_raw(dac_values[i]);
+#else
+        raw_setpoints->value_dac[i] = convert_dac_value_to_raw(dac_values[i]);
+#endif
     }
 }
 
