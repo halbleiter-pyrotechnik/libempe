@@ -12,12 +12,16 @@ void test_trapezoid(char* filename)
     /*
      * Test function parameters
      */
-    const float slope_rising = 2.0;
-    const float slope_falling = -5.5;
-    const float cutoff_min = -3.0;
-    const float cutoff_max = 5.0;
+//    const float slope_rising = 2.0;
+//    const float slope_falling = -5.5;
+//    const float cutoff_min = -3.0;
+//    const float cutoff_max = 5.0;
+    const float slope_rising = 0.1;
+    const float slope_falling = -slope_rising;
+    const float cutoff_max = 0.0177;
+    const float cutoff_min = -cutoff_max;
     const float frequency_function = 25.0;
-    const float frequency_update = 1e3;
+    const float frequency_update = 3e3;
     const float runtime = 0.2;
 
     trapezoid_t function;
@@ -45,7 +49,7 @@ void test_trapezoid(char* filename)
         // Calculate momentary function value
         trapezoid_update(&function);
 
-        fprintf(f, "%d;%.2f;%.2f;\n",
+        fprintf(f, "%d;%.3f;%.5f;\n",
                 i,
                 function.f.angle,
                 function.f.value

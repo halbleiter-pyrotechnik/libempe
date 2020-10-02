@@ -19,9 +19,9 @@ function test_function (name)
 	grid on;
 
 	title([name " function test"]);
-	ylim([-3.5 5.5]);
+	ylim([-0.1 0.1]);
 	xticks(0:10:500);
-	yticks(-3.0:0.5:5.0);
+	yticks(-0.1:0.01:0.1);
 
 	saveas(myplot, [name ".pdf"]);
 

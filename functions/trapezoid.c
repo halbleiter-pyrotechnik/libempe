@@ -51,8 +51,8 @@ void trapezoid_init(
 
     // TODO: There's something wrong here:
     float d = abs(trapezoid->f.value_delta / slope_falling) - trapezoid->angle_stop_rising;
-    trapezoid->angle_stop_falling = M_PI + d;
-    trapezoid->angle_restart_rising = M_2x_PI - d;
+    trapezoid->angle_stop_falling = M_PI - d;
+    trapezoid->angle_restart_rising = M_2x_PI + d;
 
     if (trapezoid->angle_restart_rising < trapezoid->angle_stop_falling)
     {
