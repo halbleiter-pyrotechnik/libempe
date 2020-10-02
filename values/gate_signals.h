@@ -142,12 +142,14 @@ void gate_signals_disable_threephase(gate_signals_threephase_t*);
  * as well as the new half-bridge state
  */
 void gate_signals_calculate_halfbridge(
-        pwm_unit_properties_t*,
+        pwm_unit_properties_t* pwm_unit,
         float dutycycle_highside,
         float dutycycle_lowside,
-        switching_mode_e,
-        halfbridge_state_e*,
-        gate_signals_halfbridge_t*
+        switching_mode_e switching_mode,
+        halfbridge_state_e* state,
+        gate_signals_threephase_t* common_mode_bias,
+        gate_signals_threephase_t* gate_signals_threephase,
+        uint8_t phase_index
         );
 
 /**

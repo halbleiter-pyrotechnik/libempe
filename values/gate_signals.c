@@ -26,9 +26,15 @@ void gate_signals_calculate_halfbridge(
         float dutycycle_lowside,
         switching_mode_e switching_mode,
         halfbridge_state_e* state,
-        gate_signals_halfbridge_t* gate_signals
+        gate_signals_threephase_t* common_mode_bias,
+        gate_signals_threephase_t* gate_signals_threephase,
+        uint8_t phase_index
         )
 {
+    if (phase_index > 2)
+        return;
+    gate_signals_halfbridge_t* gate_signals = &gate_signals_threephase->phase[phase_index];
+
     uint16_t tick_count_highside = pwm_unit->ticks_max_minus_deadtimes * dutycycle_highside;
     uint16_t tick_count_lowside = pwm_unit->ticks_max_minus_deadtimes * dutycycle_lowside;
     uint16_t ticks_max = pwm_unit->ticks_max;
@@ -264,15 +270,17 @@ void gate_signals_calculate_threephase(
         gate_signals_threephase_t* gate_signals
         )
 {
+    static gate_signals_threephase_t common_mode_bias;
+
     for (uint8_t i=0; i<3; i++)
-    {
         gate_signals_calculate_halfbridge(
                 values->pwm_unit_properties,
                 values->dutycycles.dutycycle_highside[i],
                 values->dutycycles.dutycycle_lowside[i],
                 values->switching_mode,
                 &values->halfbridge_states.state[i],
-                &gate_signals->phase[i]
+                &common_mode_bias,
+                gate_signals,
+                i
                 );
-    }
 }
