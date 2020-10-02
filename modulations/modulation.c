@@ -47,11 +47,13 @@ void modulation_imprint_function(
         return;
 
     f->f.angle = angle;
-    float bias = trapezoid_update(f);
     for (uint8_t i=0; i<3; i++)
     {
+        float bias = trapezoid_update(f);
         m->value[i] += bias;
-        angle += M_PI_2_3;
+        f->f.angle += M_PI_2_3;
+        if (f->f.angle > M_2x_PI)
+            f->f.angle -= M_2x_PI;
     }
 }
 
