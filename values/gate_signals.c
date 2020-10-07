@@ -47,7 +47,7 @@ inline void gate_signals_calculate_halfbridge(
      * The number of ticks per switching period
      * when not counting the deadtimes
      */
-    uint16_t ticks_max_minus_deadtimes = (pwm_unit->ticks_max-1) - deadtime_hs_to_ls - deadtime_ls_to_hs;
+    uint16_t ticks_max_minus_deadtimes = (pwm_unit->ticks_per_period-1) - deadtime_hs_to_ls - deadtime_ls_to_hs;
 
     uint16_t tick_count_highside = ticks_max_minus_deadtimes * dutycycle_highside;
     uint16_t tick_count_lowside = ticks_max_minus_deadtimes * dutycycle_lowside;
