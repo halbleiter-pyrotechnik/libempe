@@ -1,6 +1,7 @@
 
 #include "gate_signals.h"
 #include "halfbridge.h"
+#include "math.h"
 
 
 inline void gate_signals_disable_halfbridge(gate_signals_halfbridge_t* setpoints)
@@ -20,7 +21,7 @@ inline void gate_signals_disable_threephase(gate_signals_threephase_t* setpoints
 #define max(a, b)   ((a > b) ? a : b)
 
 
-void gate_signals_calculate_halfbridge(
+inline void gate_signals_calculate_halfbridge(
         pwm_unit_properties_t* pwm_unit,
         float dutycycle_highside,
         float dutycycle_lowside,
@@ -28,15 +29,28 @@ void gate_signals_calculate_halfbridge(
         halfbridge_state_e* state,
         gate_signals_threephase_t* common_mode_bias,
         gate_signals_threephase_t* gate_signals_threephase,
-        uint8_t phase_index
+        uint8_t phase_index,
+        float phase_angle
         )
 {
     if (phase_index > 2)
         return;
     gate_signals_halfbridge_t* gate_signals = &gate_signals_threephase->phase[phase_index];
 
-    uint16_t tick_count_highside = pwm_unit->ticks_max_minus_deadtimes * dutycycle_highside;
-    uint16_t tick_count_lowside = pwm_unit->ticks_max_minus_deadtimes * dutycycle_lowside;
+    /*
+     * Determine the optimal dead times, depending on the phase angle
+     */
+    uint16_t deadtime_hs_to_ls = get_deadtime_hs_to_ls_by_angle(phase_angle);
+    uint16_t deadtime_ls_to_hs = get_deadtime_ls_to_hs_by_angle(phase_angle);
+
+    /**
+     * The number of ticks per switching period
+     * when not counting the deadtimes
+     */
+    uint16_t ticks_max_minus_deadtimes = (pwm_unit->ticks_max-1) - deadtime_hs_to_ls - deadtime_ls_to_hs;
+
+    uint16_t tick_count_highside = ticks_max_minus_deadtimes * dutycycle_highside;
+    uint16_t tick_count_lowside = ticks_max_minus_deadtimes * dutycycle_lowside;
     uint16_t ticks_max = pwm_unit->ticks_max;
 
     if ((switching_mode != SIMULTANEOUS_HIGHSIDE_TURNON) && (switching_mode != SIMULTANEOUS_LOWSIDE_TURNON))
@@ -102,12 +116,12 @@ void gate_signals_calculate_halfbridge(
          * Regular PWM
          * with all high-side switches turned on simultaneously
          */
-        uint16_t ticks = pwm_unit->deadtime_ls_to_hs;
+        uint16_t ticks = deadtime_ls_to_hs;
         gate_signals->tick_number_highside_rising = ticks;
         ticks += tick_count_highside;
         gate_signals->tick_number_highside_falling = ticks;
         if (tick_count_highside > 0)
-            ticks += pwm_unit->deadtime_hs_to_ls;
+            ticks += deadtime_hs_to_ls;
         gate_signals->tick_number_lowside_rising = ticks;
         ticks += tick_count_lowside;
         gate_signals->tick_number_lowside_falling = ticks;
@@ -124,7 +138,7 @@ void gate_signals_calculate_halfbridge(
              * safely be turned on for the complete period.
              */
             if (*state == REGULAR_PWM)
-                gate_signals->tick_number_highside_rising  = max(pwm_unit->deadtime_ls_to_hs, pwm_unit->minimum_driver_off_time);
+                gate_signals->tick_number_highside_rising  = max(deadtime_ls_to_hs, pwm_unit->minimum_driver_off_time);
             else
                 // Highside is already intermittent or flat-high
                 gate_signals->tick_number_highside_rising  = 0;
@@ -187,12 +201,12 @@ void gate_signals_calculate_halfbridge(
          * Regular PWM
          * with all low-side switches turned on simultaneously
          */
-        uint16_t ticks = pwm_unit->deadtime_hs_to_ls;
+        uint16_t ticks = deadtime_hs_to_ls;
         gate_signals->tick_number_lowside_rising   = ticks;
         ticks += tick_count_lowside;
         gate_signals->tick_number_lowside_falling  = ticks;
         if (tick_count_lowside > 0)
-            ticks += pwm_unit->deadtime_ls_to_hs;
+            ticks += deadtime_ls_to_hs;
         gate_signals->tick_number_highside_rising  = ticks;
         ticks += tick_count_highside;
         gate_signals->tick_number_highside_falling = ticks;
@@ -205,7 +219,7 @@ void gate_signals_calculate_halfbridge(
              * A dead-time must be inserted at first.
              */
             if (*state == REGULAR_PWM)
-                gate_signals->tick_number_lowside_rising   = max(pwm_unit->deadtime_hs_to_ls, pwm_unit->minimum_driver_off_time);
+                gate_signals->tick_number_lowside_rising   = max(deadtime_hs_to_ls, pwm_unit->minimum_driver_off_time);
             else
                 gate_signals->tick_number_lowside_rising   = 0;
             gate_signals->tick_number_lowside_falling = ticks_max;
@@ -267,12 +281,14 @@ void gate_signals_calculate_halfbridge(
 
 void gate_signals_calculate_threephase(
         threephase_inverter_values_t* values,
-        gate_signals_threephase_t* gate_signals
+        gate_signals_threephase_t* gate_signals,
+        float angle
         )
 {
     static gate_signals_threephase_t common_mode_bias;
 
     for (uint8_t i=0; i<3; i++)
+    {
         gate_signals_calculate_halfbridge(
                 values->pwm_unit_properties,
                 values->dutycycles.dutycycle_highside[i],
@@ -281,6 +297,11 @@ void gate_signals_calculate_threephase(
                 &values->halfbridge_states.state[i],
                 &common_mode_bias,
                 gate_signals,
-                i
+                i,
+                angle
                 );
+        angle += M_PI_2_3;
+        if (angle > M_TWOPI)
+            angle -= M_TWOPI;
+    }
 }

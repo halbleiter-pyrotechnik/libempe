@@ -8,6 +8,11 @@
 
 #include <stdint.h>
 
+#ifndef M_PI_2_3
+#define M_PI_2_3 2.0943951023931953
+#endif
+
+
 /**
  * With this switch the word order in the structs below can be reversed.
  * This may be necessary in setups, where words are transmitted from last to first.
@@ -149,7 +154,8 @@ void gate_signals_calculate_halfbridge(
         halfbridge_state_e* state,
         gate_signals_threephase_t* common_mode_bias,
         gate_signals_threephase_t* gate_signals_threephase,
-        uint8_t phase_index
+        uint8_t phase_index,
+        float phase_angle
         );
 
 /**
@@ -158,7 +164,8 @@ void gate_signals_calculate_halfbridge(
  */
 void gate_signals_calculate_threephase(
         threephase_inverter_values_t*,
-        gate_signals_threephase_t*
+        gate_signals_threephase_t*,
+        float angle
         );
 
 
