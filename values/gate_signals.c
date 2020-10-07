@@ -301,7 +301,7 @@ void gate_signals_calculate_threephase(
                 angle
                 );
         angle += M_PI_2_3;
-        if (angle > M_TWOPI)
-            angle -= M_TWOPI;
+        if (angle > M_2x_PI)
+            angle -= M_2x_PI;
     }
 }

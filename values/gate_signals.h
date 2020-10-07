@@ -12,6 +12,10 @@
 #define M_PI_2_3 2.0943951023931953
 #endif
 
+#ifndef M_2x_PI
+#define M_2x_PI 6.283185307179586f
+#endif
+
 
 /**
  * With this switch the word order in the structs below can be reversed.
