@@ -12,7 +12,7 @@
 typedef struct
 {
     /** The frequency of the PWM (in Hz) unit determines the time per tick */
-    float pwm_unit_frequency;
+    float tick_frequency;
 
     /** The frequency of one switching period (in Hz) */
     float switching_frequency;
