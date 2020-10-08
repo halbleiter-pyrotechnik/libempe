@@ -7,7 +7,7 @@
 const float deadtime_hs_to_ls_correction = 6.75;
 const float deadtime_ls_to_hs_correction = 3.5;
 
-#define deadtime_min    75e-9
+#define deadtime_min    120e-9
 #define deadtime_max    300e-9
 #define curve_height    (deadtime_max - deadtime_min)
 
