@@ -3,6 +3,8 @@
 #define EMPE_PWM_UNIT_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
 
 #ifndef M_2x_PI
 #define M_2x_PI 6.283185307179586f
@@ -12,17 +14,68 @@
 #define RAD (M_PI / 180.0)
 #endif
 
+/*
+ * You may define another table length elsewhere in your code.
+ * Just make sure, it is defined before this file is included.
+ */
+#ifndef DEADTIME_LOOKUP_TABLE_LENGTH
 #define DEADTIME_LOOKUP_TABLE_LENGTH 1120
+#endif
 
 
 typedef struct
 {
-    /*
-     * Buffers to store pre-calculated dead-time values (in ticks)
+    /**
+     * Ticks to be added to a dead-time in ticks
+     * in order to achieve the expected dead-time
+     * (driver-dependent offset; may be left zero)
      */
-    uint16_t deadtime_hs_to_ls[DEADTIME_LOOKUP_TABLE_LENGTH];
-    uint16_t deadtime_ls_to_hs[DEADTIME_LOOKUP_TABLE_LENGTH];
-} deadtimes_t;
+    float driver_correction_hs_to_ls;
+    float driver_correction_ls_to_hs;
+
+    /*
+     * Boundaries for dead-time durations
+     */
+    float deadtime_min;
+    float deadtime_max;
+
+    /*
+     * Dead-time function parameters
+     */
+    float deadtime_curve_begin;
+    float deadtime_curve_end;
+    float deadtime_curve_plateau;
+    float deadtime_outside_curve;
+    float deadtime_curve_height;
+    float deadtime_curve_factor;
+
+    /**
+     * Phase angle in degrees
+     * when the dead-time reaches it's maximum (choke current is low)
+     */
+    float angle_current_threshold;
+    /**
+     * Phase angle in degrees
+     * when the choke current has reached zero
+     */
+    float angle_current_zero;
+
+    /**
+     * The four angles controlling the function behaviour
+     * (calculated from the angles above)
+     */
+    float angle1, angle2, angle3, angle4;
+
+    /*
+     * Lookup table for pre-calculated dead-time values
+     * as float i.e. in seconds respectively in PWM unit ticks
+     */
+    float deadtime_hs_to_ls[DEADTIME_LOOKUP_TABLE_LENGTH];
+    float deadtime_ls_to_hs[DEADTIME_LOOKUP_TABLE_LENGTH];
+    uint16_t ticks_hs_to_ls[DEADTIME_LOOKUP_TABLE_LENGTH];
+    uint16_t ticks_ls_to_hs[DEADTIME_LOOKUP_TABLE_LENGTH];
+
+} deadtime_parameters_t;
 
 /**
  * This struct stores properties of the PWM unit and the FET driver
@@ -60,7 +113,30 @@ typedef struct
      */
     uint16_t flat_high_threshold;
 
-    deadtimes_t deadtimes;
+    /**
+     * Whether to use variable dead-times or the constants above
+     */
+    bool use_variable_deadtimes;
+
+    /**
+     * The number of ticks to pause between the falling edge
+     * of the highside and the rising edge of the lowside gate signal
+     * (ignored when using variable dead-times)
+     */
+    uint16_t deadtime_hs_to_ls;
+
+    /**
+     * The number of ticks to pause between the falling edge
+     * of the lowside and the rising edge of the highside gate signal
+     * (ignored when using variable dead-times)
+     */
+    uint16_t deadtime_ls_to_hs;
+
+    /**
+     * Properties relevant during dead-time conversion
+     * from nanoseconds to PWM unit ticks
+     */
+    deadtime_parameters_t* variable_deadtimes;
 
 } pwm_unit_properties_t;
 
@@ -69,7 +145,7 @@ typedef struct
  * Pre-calculate all dead times and store
  * them in the lookup table
  */
-void deadtime_lookup_table_init(
+void pwm_unit_init(
         pwm_unit_properties_t* pwm_unit
         );
 

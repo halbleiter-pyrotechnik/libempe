@@ -3,45 +3,34 @@
 #include "math.h"
 
 
-/*
- * Compensation for driver delays
- * when converting dead-times from nanoseconds to ticks
- */
-const float deadtime_hs_to_ls_correction = 6.75;
-const float deadtime_ls_to_hs_correction = 3.5;
-
-/*
- * Upper and lower boundaries for dead-time durations (in nanoseconds)
- */
-#define deadtime_min            75e-9
-#define deadtime_max            300e-9
-#define deadtime_default        150e-9
-
-/*
- * Dead-time function parameters
- */
-#define deadtime_curve_begin    75e-9
-#define deadtime_curve_end      300e-9
-#define deadtime_curve_height   (deadtime_curve_end - deadtime_curve_begin)
-#define deadtime_curve_plateau  130e-9
-
-/** Phase angle at which the dead-time reaches it's maximum (choke current is low) */
-#define angle_current_threshold     28.0
-/** Phase angle at which the choke current has reached zero */
-#define angle_current_zero          30.0
-
-const float deadtime_curve_factor = deadtime_curve_height/((angle_current_threshold*RAD)*(angle_current_threshold*RAD)*(angle_current_threshold*RAD));
-
-const float angle1 = angle_current_zero * RAD;
-const float angle2 = (180.0 - angle_current_zero) * RAD;
-const float angle3 = (180.0 + angle_current_zero) * RAD;
-const float angle4 = (360.0 - angle_current_zero) * RAD;
-
-
-void deadtime_lookup_table_init(
+void pwm_unit_init(
         pwm_unit_properties_t* pwm_unit
         )
 {
+    pwm_unit->flat_high_threshold = (pwm_unit->ticks_per_period-1) - pwm_unit->minimum_driver_off_time;
+
+    if (!pwm_unit->use_variable_deadtimes)
+    {
+        pwm_unit->variable_deadtimes = 0;
+        return;
+    }
+
+    /*
+     * Calculate helper values
+     */
+    deadtime_parameters_t* deadtimes = pwm_unit->variable_deadtimes;
+    deadtimes->deadtime_curve_height = (deadtimes->deadtime_curve_end - deadtimes->deadtime_curve_begin);
+    float a = (deadtimes->angle_current_threshold*RAD);
+    deadtimes->deadtime_curve_factor = deadtimes->deadtime_curve_height/(a*a*a);
+
+    deadtimes->angle1 = deadtimes->angle_current_zero * RAD;
+    deadtimes->angle2 = (180.0 - deadtimes->angle_current_zero) * RAD;
+    deadtimes->angle3 = (180.0 + deadtimes->angle_current_zero) * RAD;
+    deadtimes->angle4 = (360.0 - deadtimes->angle_current_zero) * RAD;
+
+    /*
+     * Pre-calculate all the dead-times
+     */
     float angle = 0.0;
     const float angle_step = M_2x_PI / DEADTIME_LOOKUP_TABLE_LENGTH;
     for (uint16_t i=0; i<DEADTIME_LOOKUP_TABLE_LENGTH; i++)
@@ -65,48 +54,47 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
         )
 {
     uint16_t array_index = get_deadtime_lookup_table_index(angle);
-    uint16_t deadtime = pwm_unit->deadtimes.deadtime_hs_to_ls[array_index];
+    deadtime_parameters_t* deadtimes = pwm_unit->variable_deadtimes;
+    if (deadtimes == 0)
+        return pwm_unit->deadtime_hs_to_ls;
+    uint16_t deadtime = deadtimes->ticks_hs_to_ls[array_index];
     if (deadtime != 0)
         return deadtime;
 
-    float desired_deadtime = deadtime_default;
+    float desired_deadtime = deadtimes->deadtime_outside_curve;
 
     if (angle > M_PI)
     {
-        if (angle < angle3)
+        if (angle < deadtimes->angle3)
         {
             float a = (angle - M_PI);
-            float angle_3 = a;
-            angle_3 *= a;
-            angle_3 *= a;
-            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+            float angle_3 = a * a * a;
+            desired_deadtime = deadtimes->deadtime_curve_begin + angle_3 * deadtimes->deadtime_curve_factor;
         }
-        else if (angle > angle4)
+        else if (angle > deadtimes->angle4)
         {
             float a = (M_2x_PI - angle);
-            float angle_3 = a;
-            angle_3 *= a;
-            angle_3 *= a;
-            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+            float angle_3 = a * a * a;
+            desired_deadtime = deadtimes->deadtime_curve_begin + angle_3 * deadtimes->deadtime_curve_factor;
         }
         else
         {
-            desired_deadtime = deadtime_curve_plateau;
+            desired_deadtime = deadtimes->deadtime_curve_plateau;
         }
     }
 
-    if (desired_deadtime < deadtime_min)
-        desired_deadtime = deadtime_min;
-    else if (desired_deadtime > deadtime_max)
-        desired_deadtime = deadtime_max;
+    if (desired_deadtime < deadtimes->deadtime_min)
+        desired_deadtime = deadtimes->deadtime_min;
+    else if (desired_deadtime > deadtimes->deadtime_max)
+        desired_deadtime = deadtimes->deadtime_max;
 
     /*
      * Measured:
      * 12 ticks = 75 ns
      * 24 ticks = 229 ns
      */
-    uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtime_hs_to_ls_correction;
-    pwm_unit->deadtimes.deadtime_hs_to_ls[array_index] = ticks;
+    uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtimes->driver_correction_hs_to_ls;
+    deadtimes->ticks_hs_to_ls[array_index] = ticks;
     return ticks;
 }
 
@@ -117,46 +105,45 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
         )
 {
     uint16_t array_index = get_deadtime_lookup_table_index(angle);
-    uint16_t deadtime = pwm_unit->deadtimes.deadtime_ls_to_hs[array_index];
+    deadtime_parameters_t* deadtimes = pwm_unit->variable_deadtimes;
+    if (deadtimes == 0)
+        return pwm_unit->deadtime_ls_to_hs;
+    uint16_t deadtime = deadtimes->ticks_ls_to_hs[array_index];
     if (deadtime != 0)
         return deadtime;
 
-    float desired_deadtime = deadtime_default;
+    float desired_deadtime = deadtimes->deadtime_outside_curve;
 
     if (angle < M_PI)
     {
-        if (angle < angle1)
+        if (angle < deadtimes->angle1)
         {
-            float angle_3 = angle;
-            angle_3 *= angle;
-            angle_3 *= angle;
-            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+            float angle_3 = angle * angle * angle;
+            desired_deadtime = deadtimes->deadtime_curve_begin + angle_3 * deadtimes->deadtime_curve_factor;
         }
-        else if (angle > angle2)
+        else if (angle > deadtimes->angle2)
         {
             float a = (M_PI - angle);
-            float angle_3 = a;
-            angle_3 *= a;
-            angle_3 *= a;
-            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+            float angle_3 = a * a * a;
+            desired_deadtime = deadtimes->deadtime_curve_begin + angle_3 * deadtimes->deadtime_curve_factor;
         }
         else
         {
-            desired_deadtime = deadtime_curve_plateau;
+            desired_deadtime = deadtimes->deadtime_curve_plateau;
         }
     }
 
-    if (desired_deadtime < deadtime_min)
-        desired_deadtime = deadtime_min;
-    else if (desired_deadtime > deadtime_max)
-        desired_deadtime = deadtime_max;
+    if (desired_deadtime < deadtimes->deadtime_min)
+        desired_deadtime = deadtimes->deadtime_min;
+    else if (desired_deadtime > deadtimes->deadtime_max)
+        desired_deadtime = deadtimes->deadtime_max;
 
     /*
      * Measured:
      * 12 ticks = 106ns
      * 24 ticks = 256ns
      */
-    uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtime_ls_to_hs_correction;
-    pwm_unit->deadtimes.deadtime_ls_to_hs[array_index] = ticks;
+    uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtimes->driver_correction_ls_to_hs;
+    deadtimes->ticks_ls_to_hs[array_index] = ticks;
     return ticks;
 }
