@@ -27,7 +27,6 @@ inline void gate_signals_calculate_halfbridge(
         float dutycycle_lowside,
         switching_mode_e switching_mode,
         halfbridge_state_e* state,
-        gate_signals_threephase_t* common_mode_bias,
         gate_signals_threephase_t* gate_signals_threephase,
         uint8_t phase_index,
         float phase_angle
@@ -285,7 +284,6 @@ void gate_signals_calculate_threephase(
         float angle
         )
 {
-    static gate_signals_threephase_t common_mode_bias;
 
     for (uint8_t i=0; i<3; i++)
     {
@@ -295,7 +293,6 @@ void gate_signals_calculate_threephase(
                 values->dutycycles.dutycycle_lowside[i],
                 values->switching_mode,
                 &values->halfbridge_states.state[i],
-                &common_mode_bias,
                 gate_signals,
                 i,
                 angle

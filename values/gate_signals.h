@@ -156,7 +156,6 @@ void gate_signals_calculate_halfbridge(
         float dutycycle_lowside,
         switching_mode_e switching_mode,
         halfbridge_state_e* state,
-        gate_signals_threephase_t* common_mode_bias,
         gate_signals_threephase_t* gate_signals_threephase,
         uint8_t phase_index,
         float phase_angle
