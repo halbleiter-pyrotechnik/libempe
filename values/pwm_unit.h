@@ -8,6 +8,21 @@
 #define M_2x_PI 6.283185307179586f
 #endif
 
+#ifndef RAD
+#define RAD (M_PI / 180.0)
+#endif
+
+#define DEADTIME_LOOKUP_TABLE_LENGTH 1120
+
+
+typedef struct
+{
+    /*
+     * Buffers to store pre-calculated dead-time values (in ticks)
+     */
+    uint16_t deadtime_hs_to_ls[DEADTIME_LOOKUP_TABLE_LENGTH];
+    uint16_t deadtime_ls_to_hs[DEADTIME_LOOKUP_TABLE_LENGTH];
+} deadtimes_t;
 
 /**
  * This struct stores properties of the PWM unit and the FET driver
@@ -44,6 +59,8 @@ typedef struct
      * since the driver will not be able to switch the FET off.
      */
     uint16_t flat_high_threshold;
+
+    deadtimes_t deadtimes;
 
 } pwm_unit_properties_t;
 

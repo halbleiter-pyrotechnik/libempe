@@ -2,7 +2,6 @@
 #include "pwm_unit.h"
 #include "math.h"
 
-#define rad (M_PI / 180.0)
 
 /*
  * Compensation for driver delays
@@ -16,7 +15,7 @@ const float deadtime_ls_to_hs_correction = 3.5;
  */
 #define deadtime_min            75e-9
 #define deadtime_max            300e-9
-#define deadtime_default        120e-9
+#define deadtime_default        150e-9
 
 /*
  * Dead-time function parameters
@@ -24,25 +23,19 @@ const float deadtime_ls_to_hs_correction = 3.5;
 #define deadtime_curve_begin    75e-9
 #define deadtime_curve_end      300e-9
 #define deadtime_curve_height   (deadtime_curve_end - deadtime_curve_begin)
+#define deadtime_curve_plateau  130e-9
 
 /** Phase angle at which the dead-time reaches it's maximum (choke current is low) */
 #define angle_current_threshold     28.0
 /** Phase angle at which the choke current has reached zero */
-#define angle_current_zero          33.0
+#define angle_current_zero          30.0
 
-const float deadtime_curve_factor = deadtime_curve_height/((angle_current_threshold*rad)*(angle_current_threshold*rad)*(angle_current_threshold*rad));
+const float deadtime_curve_factor = deadtime_curve_height/((angle_current_threshold*RAD)*(angle_current_threshold*RAD)*(angle_current_threshold*RAD));
 
-const float angle1 = angle_current_zero * rad;
-const float angle2 = (180.0 - angle_current_zero) * rad;
-const float angle3 = (180.0 + angle_current_zero) * rad;
-const float angle4 = (360.0 - angle_current_zero) * rad;
-
-/*
- * Buffers to store pre-calculated dead-time values (in ticks)
- */
-#define array_length 1120
-static uint16_t deadtime_hs_to_ls[array_length] = {0};
-static uint16_t deadtime_ls_to_hs[array_length] = {0};
+const float angle1 = angle_current_zero * RAD;
+const float angle2 = (180.0 - angle_current_zero) * RAD;
+const float angle3 = (180.0 + angle_current_zero) * RAD;
+const float angle4 = (360.0 - angle_current_zero) * RAD;
 
 
 void deadtime_lookup_table_init(
@@ -50,8 +43,8 @@ void deadtime_lookup_table_init(
         )
 {
     float angle = 0.0;
-    const float angle_step = M_2x_PI / array_length;
-    for (uint16_t i=0; i<array_length; i++)
+    const float angle_step = M_2x_PI / DEADTIME_LOOKUP_TABLE_LENGTH;
+    for (uint16_t i=0; i<DEADTIME_LOOKUP_TABLE_LENGTH; i++)
     {
         get_deadtime_hs_to_ls_by_angle(pwm_unit, angle);
         get_deadtime_ls_to_hs_by_angle(pwm_unit, angle);
@@ -62,7 +55,7 @@ void deadtime_lookup_table_init(
 
 static inline uint16_t get_deadtime_lookup_table_index(float angle)
 {
-    return angle / M_2x_PI * array_length;
+    return angle / M_2x_PI * DEADTIME_LOOKUP_TABLE_LENGTH;
 }
 
 
@@ -72,7 +65,7 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
         )
 {
     uint16_t array_index = get_deadtime_lookup_table_index(angle);
-    uint16_t deadtime = deadtime_hs_to_ls[array_index];
+    uint16_t deadtime = pwm_unit->deadtimes.deadtime_hs_to_ls[array_index];
     if (deadtime != 0)
         return deadtime;
 
@@ -98,7 +91,7 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
         }
         else
         {
-            desired_deadtime = deadtime_min;
+            desired_deadtime = deadtime_curve_plateau;
         }
     }
 
@@ -113,7 +106,7 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
      * 24 ticks = 229 ns
      */
     uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtime_hs_to_ls_correction;
-    deadtime_hs_to_ls[array_index] = ticks;
+    pwm_unit->deadtimes.deadtime_hs_to_ls[array_index] = ticks;
     return ticks;
 }
 
@@ -124,7 +117,7 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
         )
 {
     uint16_t array_index = get_deadtime_lookup_table_index(angle);
-    uint16_t deadtime = deadtime_ls_to_hs[array_index];
+    uint16_t deadtime = pwm_unit->deadtimes.deadtime_ls_to_hs[array_index];
     if (deadtime != 0)
         return deadtime;
 
@@ -149,7 +142,7 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
         }
         else
         {
-            desired_deadtime = deadtime_min;
+            desired_deadtime = deadtime_curve_plateau;
         }
     }
 
@@ -164,6 +157,6 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
      * 24 ticks = 256ns
      */
     uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtime_ls_to_hs_correction;
-    deadtime_ls_to_hs[array_index] = ticks;
+    pwm_unit->deadtimes.deadtime_ls_to_hs[array_index] = ticks;
     return ticks;
 }

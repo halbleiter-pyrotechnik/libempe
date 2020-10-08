@@ -22,6 +22,8 @@ void test_deadtimes(char* filename)
     FILE* f;
     f = fopen(filename, "w");
 
+    deadtime_lookup_table_init(&pwm_unit_properties);
+
     const float step = 0.5;
     float angle_step = step * M_PI / 180.0;
     float angle = 0.0;
