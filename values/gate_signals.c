@@ -183,21 +183,6 @@ inline void gate_signals_calculate_halfbridge(
                 gate_signals->tick_number_lowside_rising   = ticks_max;
                 gate_signals->tick_number_lowside_falling  = ticks_max;
             }
-
-            /**
-             * The first (and only the first) high-side pulse
-             * after a lowside flat-high / highside flat-low period,
-             * is delayed by about 103ns.
-             * This is compensated below.
-             *
-             * CAVEAT: This only works, if the control frequency equals the switching frequency.
-             */
-//            if ((setpoints->state[phase] != REGULAR_PWM) && !(flat_high_highside || flat_high_lowside || flat_low_highside || flat_low_lowside))
-//            {
-//                // Accelerate this pulse
-//                gate_signals->tick_number_highside_rising  -= 8;
-//                gate_signals->tick_number_highside_falling -= 8;
-//            }
         }
     }
     else if (switching_mode == SIMULTANEOUS_LOWSIDE_TURNON)
