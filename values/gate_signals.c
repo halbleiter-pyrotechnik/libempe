@@ -39,8 +39,14 @@ inline void gate_signals_calculate_halfbridge(
     /*
      * Determine the optimal dead times, depending on the phase angle
      */
-    uint16_t deadtime_hs_to_ls = get_deadtime_hs_to_ls_by_angle(phase_angle);
-    uint16_t deadtime_ls_to_hs = get_deadtime_ls_to_hs_by_angle(phase_angle);
+    uint16_t deadtime_hs_to_ls = get_deadtime_hs_to_ls_by_angle(
+                                    pwm_unit,
+                                    phase_angle
+                                    );
+    uint16_t deadtime_ls_to_hs = get_deadtime_ls_to_hs_by_angle(
+                                    pwm_unit,
+                                    phase_angle
+                                    );
 
     /**
      * The number of ticks per switching period

@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#ifndef M_2x_PI
+#define M_2x_PI 6.283185307179586f
+#endif
+
 
 /**
  * This struct stores properties of the PWM unit and the FET driver
@@ -49,14 +53,20 @@ typedef struct
  * and the rising edge of the complementary low-side gate signal (in FPGA ticks)
  * depending on the corresponding half-bridge's momentary phase angle (in rad)
  */
-uint16_t get_deadtime_hs_to_ls_by_angle(float angle);
+uint16_t get_deadtime_hs_to_ls_by_angle(
+        pwm_unit_properties_t*,
+        float angle
+        );
 
 /**
  * Returns the optimal dead time between the falling edge of the low-side
  * and the rising edge of the complementary high-side gate signal (in FPGA ticks)
  * depending on the corresponding half-bridge's momentary phase angle (in rad)
  */
-uint16_t get_deadtime_ls_to_hs_by_angle(float angle);
+uint16_t get_deadtime_ls_to_hs_by_angle(
+        pwm_unit_properties_t*,
+        float angle
+        );
 
 
 #endif
