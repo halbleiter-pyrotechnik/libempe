@@ -4,24 +4,43 @@
 
 #define rad (M_PI / 180.0)
 
+/*
+ * Compensation for driver delays
+ * when converting dead-times from nanoseconds to ticks
+ */
 const float deadtime_hs_to_ls_correction = 6.75;
 const float deadtime_ls_to_hs_correction = 3.5;
 
-#define deadtime_min    120e-9
-#define deadtime_max    300e-9
-#define curve_height    (deadtime_max - deadtime_min)
+/*
+ * Upper and lower boundaries for dead-time durations (in nanoseconds)
+ */
+#define deadtime_min            75e-9
+#define deadtime_max            300e-9
+#define deadtime_default        75e-9
 
-#define angle_begin  28.0
-#define angle_end    33.0
-const float curve_factor = curve_height/((angle_begin*rad)*(angle_begin*rad)*(angle_begin*rad));
+/*
+ * Dead-time function parameters
+ */
+#define deadtime_curve_begin    120e-9
+#define deadtime_curve_end      300e-9
+#define deadtime_curve_height   (deadtime_curve_end - deadtime_curve_begin)
 
-const float angle1 = angle_end * rad;
-const float angle2 = (180.0 - angle_end) * rad;
-const float angle3 = (180.0 + angle_end) * rad;
-const float angle4 = (360.0 - angle_end) * rad;
+/** Phase angle at which the dead-time reaches it's maximum (choke current is low) */
+#define angle_current_threshold     28.0
+/** Phase angle at which the choke current has reached zero */
+#define angle_current_zero          33.0
 
+const float deadtime_curve_factor = deadtime_curve_height/((angle_current_threshold*rad)*(angle_current_threshold*rad)*(angle_current_threshold*rad));
 
-#define array_length 360
+const float angle1 = angle_current_zero * rad;
+const float angle2 = (180.0 - angle_current_zero) * rad;
+const float angle3 = (180.0 + angle_current_zero) * rad;
+const float angle4 = (360.0 - angle_current_zero) * rad;
+
+/*
+ * Buffers to store pre-calculated dead-time values (in ticks)
+ */
+#define array_length 1120
 static uint16_t deadtime_hs_to_ls[array_length] = {0};
 static uint16_t deadtime_ls_to_hs[array_length] = {0};
 
@@ -57,7 +76,7 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
     if (deadtime != 0)
         return deadtime;
 
-    float desired_deadtime = deadtime_min;
+    float desired_deadtime = deadtime_default;
 
     if ((angle > M_PI) && (angle < angle3))
     {
@@ -65,7 +84,7 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
         float angle_3 = a;
         angle_3 *= a;
         angle_3 *= a;
-        desired_deadtime = deadtime_min + angle_3 * curve_factor;
+        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
     }
     else if (angle > angle4)
     {
@@ -73,7 +92,7 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
         float angle_3 = a;
         angle_3 *= a;
         angle_3 *= a;
-        desired_deadtime = deadtime_min + angle_3 * curve_factor;
+        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
     }
 
     if (desired_deadtime < deadtime_min)
@@ -102,14 +121,14 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
     if (deadtime != 0)
         return deadtime;
 
-    float desired_deadtime = deadtime_min;
+    float desired_deadtime = deadtime_default;
 
     if (angle < angle1)
     {
         float angle_3 = angle;
         angle_3 *= angle;
         angle_3 *= angle;
-        desired_deadtime = deadtime_min + angle_3 * curve_factor;
+        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
     }
     else if ((angle > angle2) && (angle < M_PI))
     {
@@ -117,7 +136,7 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
         float angle_3 = a;
         angle_3 *= a;
         angle_3 *= a;
-        desired_deadtime = deadtime_min + angle_3 * curve_factor;
+        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
     }
 
     if (desired_deadtime < deadtime_min)
