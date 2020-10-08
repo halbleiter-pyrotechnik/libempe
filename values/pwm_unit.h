@@ -49,6 +49,14 @@ typedef struct
 
 
 /**
+ * Pre-calculate all dead times and store
+ * them in the lookup table
+ */
+void deadtime_lookup_table_init(
+        pwm_unit_properties_t* pwm_unit
+        );
+
+/**
  * Returns the optimal dead time between the falling edge of the high-side
  * and the rising edge of the complementary low-side gate signal (in FPGA ticks)
  * depending on the corresponding half-bridge's momentary phase angle (in rad)
