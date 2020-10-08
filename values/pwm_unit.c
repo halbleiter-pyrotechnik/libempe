@@ -16,12 +16,12 @@ const float deadtime_ls_to_hs_correction = 3.5;
  */
 #define deadtime_min            75e-9
 #define deadtime_max            300e-9
-#define deadtime_default        75e-9
+#define deadtime_default        120e-9
 
 /*
  * Dead-time function parameters
  */
-#define deadtime_curve_begin    120e-9
+#define deadtime_curve_begin    75e-9
 #define deadtime_curve_end      300e-9
 #define deadtime_curve_height   (deadtime_curve_end - deadtime_curve_begin)
 
@@ -78,21 +78,28 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
 
     float desired_deadtime = deadtime_default;
 
-    if ((angle > M_PI) && (angle < angle3))
+    if (angle > M_PI)
     {
-        float a = (angle - M_PI);
-        float angle_3 = a;
-        angle_3 *= a;
-        angle_3 *= a;
-        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
-    }
-    else if (angle > angle4)
-    {
-        float a = (M_2x_PI - angle);
-        float angle_3 = a;
-        angle_3 *= a;
-        angle_3 *= a;
-        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+        if (angle < angle3)
+        {
+            float a = (angle - M_PI);
+            float angle_3 = a;
+            angle_3 *= a;
+            angle_3 *= a;
+            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+        }
+        else if (angle > angle4)
+        {
+            float a = (M_2x_PI - angle);
+            float angle_3 = a;
+            angle_3 *= a;
+            angle_3 *= a;
+            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+        }
+        else
+        {
+            desired_deadtime = deadtime_min;
+        }
     }
 
     if (desired_deadtime < deadtime_min)
@@ -123,20 +130,27 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
 
     float desired_deadtime = deadtime_default;
 
-    if (angle < angle1)
+    if (angle < M_PI)
     {
-        float angle_3 = angle;
-        angle_3 *= angle;
-        angle_3 *= angle;
-        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
-    }
-    else if ((angle > angle2) && (angle < M_PI))
-    {
-        float a = (M_PI - angle);
-        float angle_3 = a;
-        angle_3 *= a;
-        angle_3 *= a;
-        desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+        if (angle < angle1)
+        {
+            float angle_3 = angle;
+            angle_3 *= angle;
+            angle_3 *= angle;
+            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+        }
+        else if (angle > angle2)
+        {
+            float a = (M_PI - angle);
+            float angle_3 = a;
+            angle_3 *= a;
+            angle_3 *= a;
+            desired_deadtime = deadtime_curve_begin + angle_3 * deadtime_curve_factor;
+        }
+        else
+        {
+            desired_deadtime = deadtime_min;
+        }
     }
 
     if (desired_deadtime < deadtime_min)

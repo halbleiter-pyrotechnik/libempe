@@ -20,12 +20,14 @@ function test_deadtimes()
 #    plot(angle, deadtime1);
 #	hold on;
 	grid on;
+	ylabel(ax(1), "Dead-time between HS turn-off and LS turn-on / ticks");
+	ylabel(ax(2), "Dead-time between LS turn-off and HS turn-on / ticks");
 
 	title([name " test"]);
 #	ylim([5 35]);
 	set(ax(1), 'Xtick', [0:0.5:6.9]);
 #	set(ax(2), 'Xtick', [0:20:365]);
-    set([h1,h2], "linewidth", "1.5px");
+    set([h1,h2], "linewidth", 1.5);
 	set(ax(1), 'Ytick', [0:1:40]);
 	set(ax(2), 'Ytick', [0:1:40]);
 
