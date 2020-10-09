@@ -53,12 +53,19 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
         float angle
         )
 {
+    if (!pwm_unit->use_variable_deadtimes)
+        // Using constant dead-times
+        return pwm_unit->deadtime_hs_to_ls;
+
     uint16_t array_index = get_deadtime_lookup_table_index(angle);
     deadtime_parameters_t* deadtimes = pwm_unit->variable_deadtimes;
     if (deadtimes == 0)
+        // Illegal pointer error
         return pwm_unit->deadtime_hs_to_ls;
+
     uint16_t deadtime = deadtimes->ticks_hs_to_ls[array_index];
     if (deadtime != 0)
+        // Use pre-calculated dead-time
         return deadtime;
 
     float desired_deadtime = deadtimes->deadtime_outside_curve;
@@ -105,12 +112,19 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
         float angle
         )
 {
+    if (!pwm_unit->use_variable_deadtimes)
+        // Using constant dead-times
+        return pwm_unit->deadtime_ls_to_hs;
+
     uint16_t array_index = get_deadtime_lookup_table_index(angle);
     deadtime_parameters_t* deadtimes = pwm_unit->variable_deadtimes;
     if (deadtimes == 0)
+        // Illegal pointer error
         return pwm_unit->deadtime_ls_to_hs;
+
     uint16_t deadtime = deadtimes->ticks_ls_to_hs[array_index];
     if (deadtime != 0)
+        // Use pre-calculated dead-time
         return deadtime;
 
     float desired_deadtime = deadtimes->deadtime_outside_curve;
