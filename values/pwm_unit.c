@@ -42,7 +42,7 @@ void pwm_unit_init(
 }
 
 
-static inline uint16_t get_deadtime_lookup_table_index(float angle)
+inline uint16_t get_deadtime_lookup_table_index(float angle)
 {
     return angle / M_2x_PI * DEADTIME_LOOKUP_TABLE_LENGTH;
 }
@@ -93,6 +93,7 @@ inline uint16_t get_deadtime_hs_to_ls_by_angle(
      * 12 ticks = 75 ns
      * 24 ticks = 229 ns
      */
+    deadtimes->deadtime_hs_to_ls[array_index] = desired_deadtime;
     uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtimes->driver_correction_hs_to_ls;
     deadtimes->ticks_hs_to_ls[array_index] = ticks;
     return ticks;
@@ -143,6 +144,7 @@ inline uint16_t get_deadtime_ls_to_hs_by_angle(
      * 12 ticks = 106ns
      * 24 ticks = 256ns
      */
+    deadtimes->deadtime_ls_to_hs[array_index] = desired_deadtime;
     uint16_t ticks = desired_deadtime * pwm_unit->tick_frequency + deadtimes->driver_correction_ls_to_hs;
     deadtimes->ticks_ls_to_hs[array_index] = ticks;
     return ticks;

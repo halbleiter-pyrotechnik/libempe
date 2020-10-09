@@ -150,6 +150,11 @@ void pwm_unit_init(
         );
 
 /**
+ * Return the lookup table index for the given phase angle in rad
+ */
+uint16_t get_deadtime_lookup_table_index(float angle);
+
+/**
  * Returns the optimal dead time between the falling edge of the high-side
  * and the rising edge of the complementary low-side gate signal (in FPGA ticks)
  * depending on the corresponding half-bridge's momentary phase angle (in rad)

@@ -52,6 +52,7 @@ void test_deadtimes(char* filename)
     f = fopen(filename, "w");
 
     pwm_unit_init(&pwm_unit_properties);
+    deadtime_parameters_t* deadtimes = pwm_unit_properties.variable_deadtimes;
 
     const float step = 0.5;
     float angle_step = step * M_PI / 180.0;
@@ -66,12 +67,17 @@ void test_deadtimes(char* filename)
                         &pwm_unit_properties,
                         angle
                         );
+        uint16_t index = get_deadtime_lookup_table_index(angle);
+        float f1 = deadtimes->deadtime_hs_to_ls[index] * 1e9;
+        float f2 = deadtimes->deadtime_ls_to_hs[index] * 1e9;
 
-        fprintf(f, "%d;%.2f;%d;%d;\n",
+        fprintf(f, "%d;%.2f;%d;%d;%.2f;%.2f;\n",
                 i,
                 angle,
                 d1,
-                d2
+                d2,
+                f1,
+                f2
                 );
 
         angle += angle_step;
