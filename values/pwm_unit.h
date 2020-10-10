@@ -119,18 +119,28 @@ typedef struct
     bool use_variable_deadtimes;
 
     /**
+     * The dead-time between the falling edge of the highside
+     * and the rising edge of the lowside gate signal (in seconds)
+     */
+    float deadtime_hs_to_ls;
+
+    /**
+     * The dead-time between the falling edge of the lowside
+     * and the rising edge of the highside gate signal (in seconds)
+     */
+    float deadtime_ls_to_hs;
+
+    /**
      * The number of ticks to pause between the falling edge
      * of the highside and the rising edge of the lowside gate signal
-     * (ignored when using variable dead-times)
      */
-    uint16_t deadtime_hs_to_ls;
+    uint16_t deadtime_ticks_hs_to_ls;
 
     /**
      * The number of ticks to pause between the falling edge
      * of the lowside and the rising edge of the highside gate signal
-     * (ignored when using variable dead-times)
      */
-    uint16_t deadtime_ls_to_hs;
+    uint16_t deadtime_ticks_ls_to_hs;
 
     /**
      * Properties relevant during dead-time conversion
