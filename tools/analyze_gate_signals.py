@@ -70,10 +70,13 @@ print("Setting trigger level to {:f} V.".format(triggerLevel))
 #
 print("Attempting to find the switching frequency...")
 f = open("switching_frequency.csv", "w")
+g = open("dutycycles.csv", "w")
 state = (value[0] > triggerLevel)
 lastTime = 0.0
 period = []
 sum = 0.0
+dutyStart = 0.0
+dutyStop = 0.0
 for i in range(len(value)):
     newState = (value[i] > triggerLevel)
     if (state == False) and (newState == True):
@@ -82,10 +85,19 @@ for i in range(len(value)):
         period += [p]
         sum += p
         f.write("{:d}{:s}{:.12f}\n".format(i, fieldSeparator, p))
+        if p != 0.0:
+            dutycycle = (dutyStop - dutyStart) / p
+            if dutycycle < 1.0:
+                g.write("{:d}{:s}{:.12f}\n".format(i, fieldSeparator, dutycycle))
         lastTime = time[i]
+        dutyStart = time[i]
+    elif (state == True) and (newState == False):
+        # Falling edge
+        dutyStop = time[i]
     state = newState
 
 f.close()
+g.close()
 
 meanPeriod = sum/len(period)
 print("Mean period/s: {:.12f}".format(meanPeriod))
